@@ -2,7 +2,7 @@
     "100092006324917": {
         "userID": "100092006324917",
         "money": 1e+96,
-        "exp": 1519,
+        "exp": 1524,
         "createTime": {
             "timestamp": 1748273172692
         },
@@ -11,7 +11,7 @@
             "busy": false,
             "workTime": 1749800037975
         },
-        "lastUpdate": 1750503094666,
+        "lastUpdate": 1750504689299,
         "name": "MD Tohidul Islam",
         "lastDaily": 1749800679916
     },
@@ -1377,14 +1377,14 @@
     "100058914930837": {
         "userID": "100058914930837",
         "money": 0,
-        "exp": 23,
+        "exp": 24,
         "createTime": {
             "timestamp": 1748430692837
         },
         "data": {
             "timestamp": 1748430692837
         },
-        "lastUpdate": 1750494265445,
+        "lastUpdate": 1750504454091,
         "name": "TO HI Dul"
     },
     "100091429302077": {
@@ -2407,14 +2407,14 @@
     "100000967372029": {
         "userID": "100000967372029",
         "money": 0,
-        "exp": 2,
+        "exp": 3,
         "createTime": {
             "timestamp": 1750344600708
         },
         "data": {
             "timestamp": 1750344600708
         },
-        "lastUpdate": 1750433381519,
+        "lastUpdate": 1750504594725,
         "name": "〲Arish আহমেদ Tushar㐃"
     },
     "61556130727996": {

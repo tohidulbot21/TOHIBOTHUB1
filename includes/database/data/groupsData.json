@@ -35,6 +35,27 @@
         "autoApprove": false
       },
       "lastUpdated": "2025-06-21T10:51:33.414Z"
+    },
+    "9826242237455305": {
+      "threadID": "9826242237455305",
+      "threadName": "☠️𝚃𝙷𝙴 𝙱𝙾𝚃 ʷᵒʳˡᵈ ╰_╯",
+      "memberCount": 10,
+      "status": "approved",
+      "createdAt": "2025-06-21T11:12:26.155Z",
+      "lastUpdated": "2025-06-21T11:12:26.156Z",
+      "adminList": [
+        {
+          "id": "61557765517246"
+        },
+        {
+          "id": "100092006324917"
+        }
+      ],
+      "settings": {
+        "allowCommands": true,
+        "autoApprove": false
+      },
+      "approvedAt": "2025-06-21T11:12:26.156Z"
     }
   },
   "settings": {
