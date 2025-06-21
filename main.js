@@ -94,7 +94,7 @@ try {
 }
 
 // Global system initialization
-logger.log("Initializing Enhanced TOHI-BOT-HUB System...", "STARTER");
+logger.log("Initializing TOHI-BOT-HUB System...", "STARTER");
 
 // Enhanced global objects
 global.utils = require("./utils/index.js");
@@ -562,11 +562,11 @@ async function startListening(api) {
   console.log(tertiary(`\n──BOT READY─●`));
 
   const startupTime = ((Date.now() - global.client.timeStart) / 1000).toFixed(2);
-  logger.log(`✓ Enhanced System Ready! Commands: ${global.client.commands.size}, Events: ${global.client.events.size}`, "READY");
+  logger.log(`✓  System Ready! Commands: ${global.client.commands.size}, Events: ${global.client.events.size}`, "READY");
   logger.log(`⏱️ Startup time: ${startupTime}s`, "READY");
 
   logger.log(
-    `[ BOT_INFO ] Enhanced Bot Ready!\n[ NAME ]: ${global.config.BOTNAME || "TOHI-BOT"} \n[ BotID ]: ${api.getCurrentUserID()}\n[ PREFIX ]: ${global.config.PREFIX}\n[ VERSION ]: 2.0.0 Enhanced`,
+    `[ BOT_INFO ] Bot Ready!\n[ NAME ]: ${global.config.BOTNAME || "TOHI-BOT"} \n[ BotID ]: ${api.getCurrentUserID()}\n[ PREFIX ]: ${global.config.PREFIX}\n[ VERSION ]: 2.0.0`,
     "LOADED"
   );
 
@@ -597,7 +597,7 @@ async function startListening(api) {
 (async () => {
   try {
     console.log(tertiary(`\n──DATABASE─●`));
-    logger.log("✓ Connected to Enhanced JSON database successfully!", "DATABASE");
+    logger.log("✓ Connected to JSON database successfully!", "DATABASE");
 
     // Start bot initialization
     initializeBot();
