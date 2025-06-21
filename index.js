@@ -175,26 +175,10 @@ console.log(chalk.blue.bold(`
 ║          TOHI-BOT-HUB v1.8.0         ║
 ║      Advanced Facebook Bot System    ║
 ║     Created by TOHI-BOT-HUB Team     ║
-║         Optimized for Render         ║
 ╚══════════════════════════════════════╝
 `));
 
-// Render environment detection and optimization
-if (process.env.RENDER || process.env.RENDER_SERVICE_ID) {
-  console.log(chalk.green("🚀 Render deployment detected - applying optimizations"));
-  
-  // Set production mode
-  process.env.NODE_ENV = 'production';
-  
-  // Optimize for Render's memory constraints
-  if (global.gc) {
-    setInterval(() => {
-      if (global.gc && typeof global.gc === 'function') {
-        global.gc();
-      }
-    }, 60000); // Run GC every minute
-  }
-}
+
 
 // Use themed logging for startup
 logger.themed.banner("TOHI-BOT-HUB STARTING UP");
