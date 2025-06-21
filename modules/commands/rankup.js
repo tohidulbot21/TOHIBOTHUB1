@@ -88,19 +88,23 @@ module.exports.handleEvent = async function({
   } catch (error) {
     name = `User-${id1.slice(-6)}`;
   }
-    // Fallback for getText function
-    const getTextSafe = (key) => {
-      if (typeof getText === 'function') {
-        return getText(key);
+    // Get levelup message with proper fallback
+    let messsage;
+    try {
+      if (typeof thread.customRankup !== "undefined") {
+        messsage = thread.customRankup;
+      } else if (typeof getText === 'function') {
+        messsage = getText("levelup");
+      } else {
+        // Use module's own language config as fallback
+        const lang = global.config.language || "en";
+        const langData = module.exports.languages[lang] || module.exports.languages["en"];
+        messsage = langData.levelup || "Congratulations {name}, being talkative helped you level up to level {level}!";
       }
-      // Fallback messages
-      const fallbackMessages = {
-        "levelup": "Congratulations {name}, being talkative helped you level up to level {level}!"
-      };
-      return fallbackMessages[key] || `Message for ${key}`;
-    };
-
-    var messsage = (typeof thread.customRankup == "undefined") ? msg = getTextSafe("levelup") : msg = thread.customRankup;
+    } catch (error) {
+      // Final fallback if everything fails
+      messsage = "Congratulations {name}, being talkative helped you level up to level {level}!";
+    }
 
     messsage = messsage
       .replace(/\{name}/g, name)
@@ -189,9 +193,21 @@ module.exports.handleEvent = async function({
 module.exports.languages = {
   "en": {
     "on": "on",
-    "off": "off",
+    "off": "off", 
     "successText": "success notification rankup!",
-    "levelup": "Congratulations {name}, being talkative helped you level up to level {level}!",
+    "levelup": "Congratulations {name}, being talkative helped you level up to level {level}!"
+  },
+  "vi": {
+    "on": "bật",
+    "off": "tắt",
+    "successText": "thành công thông báo rankup!",
+    "levelup": "Chúc mừng {name}, việc nói chuyện nhiều đã giúp bạn lên cấp độ {level}!"
+  },
+  "bd": {
+    "on": "চালু",
+    "off": "বন্ধ",
+    "successText": "র‍্যাঙ্কআপ বিজ্ঞপ্তি সফল!",
+    "levelup": "অভিনন্দন {name}, কথোপকথন আপনাকে লেভেল {level} এ উন্নীত করেছে!"
   }
 }
 
