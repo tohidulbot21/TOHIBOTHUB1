@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "apis": [
+    {
+      "identifier": "picsartfordevelopers",
+      "source": "@picsartfordevelopers/v1.0#1j1f36kmbtj1tnl",
+      "integrity": "sha512-Imo79f00elrulAshtZx5oe6mDmEMVHLyuZ7qxZHXKMNZfZ5S+rSBRo78C0r1u+zyhz5menvhG7Ry61ZudaYNsg==",
+      "installerVersion": "6.1.3"
+    }
+  ]
+}

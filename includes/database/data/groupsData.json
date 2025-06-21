@@ -1,0 +1,34 @@
+{
+  "groups": {
+    "6601227983317461": {
+      "status": "approved",
+      "approvedAt": "2025-06-20T11:46:10.054Z",
+      "settings": {
+        "allowCommands": true,
+        "autoApprove": false
+      },
+      "lastUpdated": "2025-06-20T11:46:10.054Z"
+    },
+    "8691975704250419": {
+      "status": "approved",
+      "approvedAt": "2025-06-20T11:48:29.307Z",
+      "settings": {
+        "allowCommands": true,
+        "autoApprove": false
+      },
+      "lastUpdated": "2025-06-20T11:48:29.307Z"
+    },
+    "29898944713085639": {
+      "status": "approved",
+      "approvedAt": "2025-06-20T12:48:03.576Z",
+      "settings": {
+        "allowCommands": true,
+        "autoApprove": false
+      },
+      "lastUpdated": "2025-06-20T12:48:03.576Z"
+    }
+  },
+  "settings": {
+    "migrated": true
+  }
+}

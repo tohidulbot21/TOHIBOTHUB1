@@ -1,0 +1,5 @@
+{
+  "timestamp": "2025-06-01T09:38:51.528Z",
+  "error": "cron.getTasks is not a function",
+  "stack": "TypeError: cron.getTasks is not a function\n    at process.<anonymous> (/home/runner/workspace/custom.js:323:10)\n    at process.emit (node:events:518:28)"
+}

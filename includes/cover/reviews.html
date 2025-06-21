@@ -1,0 +1,622 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOHI-BOT Reviews & Ratings</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .overview-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .overview-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .overview-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f39c12;
+            display: block;
+        }
+        
+        .overview-label {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        
+        .rating-distribution {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .rating-distribution h3 {
+            margin-bottom: 1.5rem;
+            color: #f39c12;
+        }
+        
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .rating-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 80px;
+        }
+        
+        .rating-progress {
+            flex: 1;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .rating-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+        
+        .rating-count {
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        .reviews-section h3 {
+            color: #f39c12;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+        
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .command-review {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .command-review:hover {
+            transform: translateY(-5px);
+        }
+        
+        .command-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .command-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #3498db;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .command-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stars {
+            color: #f39c12;
+        }
+        
+        .rating-text {
+            font-weight: bold;
+        }
+        
+        .review-count {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .recent-reviews {
+            margin-top: 1rem;
+        }
+        
+        .review-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid #3498db;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .reviewer-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .review-date {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+        
+        .review-text {
+            font-style: italic;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+        
+        .add-review {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .add-review:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #f39c12;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            opacity: 0.7;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-tab.active {
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+        }
+        
+        .filter-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1><i class="fas fa-star"></i> TOHI-BOT Reviews & Ratings</h1>
+        <p>Community feedback and ratings for bot commands</p>
+    </header>
+    
+    <div class="container">
+        <!-- Overview Statistics -->
+        <div class="overview">
+            <div class="overview-card">
+                <span class="overview-number" id="totalReviews">0</span>
+                <div class="overview-label">Total Reviews</div>
+            </div>
+            <div class="overview-card">
+                <span class="overview-number" id="avgRating">0.0</span>
+                <div class="overview-label">Average Rating</div>
+            </div>
+            <div class="overview-card">
+                <span class="overview-number" id="commandsReviewed">0</span>
+                <div class="overview-label">Commands Reviewed</div>
+            </div>
+            <div class="overview-card">
+                <span class="overview-number" id="topRated">N/A</span>
+                <div class="overview-label">Top Rated Command</div>
+            </div>
+        </div>
+        
+        <!-- Rating Distribution -->
+        <div class="rating-distribution">
+            <h3><i class="fas fa-chart-bar"></i> Rating Distribution</h3>
+            <div class="rating-bar">
+                <div class="rating-label">
+                    <span>5</span>
+                    <i class="fas fa-star" style="color: #f39c12;"></i>
+                </div>
+                <div class="rating-progress">
+                    <div class="rating-fill" id="rating5" style="width: 0%"></div>
+                </div>
+                <div class="rating-count" id="count5">0</div>
+            </div>
+            <div class="rating-bar">
+                <div class="rating-label">
+                    <span>4</span>
+                    <i class="fas fa-star" style="color: #f39c12;"></i>
+                </div>
+                <div class="rating-progress">
+                    <div class="rating-fill" id="rating4" style="width: 0%"></div>
+                </div>
+                <div class="rating-count" id="count4">0</div>
+            </div>
+            <div class="rating-bar">
+                <div class="rating-label">
+                    <span>3</span>
+                    <i class="fas fa-star" style="color: #f39c12;"></i>
+                </div>
+                <div class="rating-progress">
+                    <div class="rating-fill" id="rating3" style="width: 0%"></div>
+                </div>
+                <div class="rating-count" id="count3">0</div>
+            </div>
+            <div class="rating-bar">
+                <div class="rating-label">
+                    <span>2</span>
+                    <i class="fas fa-star" style="color: #f39c12;"></i>
+                </div>
+                <div class="rating-progress">
+                    <div class="rating-fill" id="rating2" style="width: 0%"></div>
+                </div>
+                <div class="rating-count" id="count2">0</div>
+            </div>
+            <div class="rating-bar">
+                <div class="rating-label">
+                    <span>1</span>
+                    <i class="fas fa-star" style="color: #f39c12;"></i>
+                </div>
+                <div class="rating-progress">
+                    <div class="rating-fill" id="rating1" style="width: 0%"></div>
+                </div>
+                <div class="rating-count" id="count1">0</div>
+            </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterReviews('all')">All Commands</div>
+            <div class="filter-tab" onclick="filterReviews('top')">Top Rated</div>
+            <div class="filter-tab" onclick="filterReviews('recent')">Most Recent</div>
+            <div class="filter-tab" onclick="filterReviews('media')">Media Commands</div>
+            <div class="filter-tab" onclick="filterReviews('ai')">AI Commands</div>
+        </div>
+        
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h3><i class="fas fa-comments"></i> Command Reviews</h3>
+            <div id="reviewsContainer" class="reviews-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading reviews...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="add-review" onclick="showAddReviewModal()" title="Add Review">
+        <i class="fas fa-plus"></i>
+    </button>
+    
+    <script>
+        let allReviews = {};
+        let currentFilter = 'all';
+        
+        // Sample review data - in real implementation, this would come from API
+        function generateSampleData() {
+            return {
+                "help": [
+                    { rating: 5, review: "Excellent command! Very comprehensive and helpful.", userName: "TechUser", date: Date.now() - 86400000 },
+                    { rating: 4, review: "Good organization, easy to navigate.", userName: "BotLover", date: Date.now() - 172800000 }
+                ],
+                "tiktok": [
+                    { rating: 5, review: "Downloads videos perfectly! Super fast.", userName: "VideoFan", date: Date.now() - 259200000 },
+                    { rating: 5, review: "Amazing quality downloads, no watermark!", userName: "TikTokUser", date: Date.now() - 345600000 }
+                ],
+                "ai": [
+                    { rating: 4, review: "Smart AI responses, very helpful for queries.", userName: "AIExplorer", date: Date.now() - 432000000 },
+                    { rating: 5, review: "Best AI integration I've seen in a bot!", userName: "TechGuru", date: Date.now() - 518400000 }
+                ],
+                "music": [
+                    { rating: 5, review: "High quality music downloads, love it!", userName: "MusicLover", date: Date.now() - 604800000 },
+                    { rating: 4, review: "Good selection, fast downloads.", userName: "SongHunter", date: Date.now() - 691200000 }
+                ],
+                "translate": [
+                    { rating: 4, review: "Accurate translations, supports many languages.", userName: "Polyglot", date: Date.now() - 777600000 }
+                ],
+                "gemini": [
+                    { rating: 5, review: "Incredible AI responses, very intelligent!", userName: "GoogleFan", date: Date.now() - 864000000 }
+                ],
+                "weather": [
+                    { rating: 4, review: "Accurate weather info, nice formatting.", userName: "WeatherWatcher", date: Date.now() - 950400000 }
+                ]
+            };
+        }
+        
+        async function loadReviews() {
+            try {
+                // Try to load from API first
+                const response = await fetch('/api/reviews');
+                if (response.ok) {
+                    allReviews = await response.json();
+                } else {
+                    // Fallback to sample data
+                    allReviews = generateSampleData();
+                }
+                
+                updateOverviewStats();
+                updateRatingDistribution();
+                displayReviews();
+                
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                allReviews = generateSampleData();
+                updateOverviewStats();
+                updateRatingDistribution();
+                displayReviews();
+            }
+        }
+        
+        function updateOverviewStats() {
+            const commands = Object.keys(allReviews);
+            const totalReviews = Object.values(allReviews).flat();
+            
+            document.getElementById('totalReviews').textContent = totalReviews.length;
+            document.getElementById('commandsReviewed').textContent = commands.length;
+            
+            if (totalReviews.length > 0) {
+                const avgRating = (totalReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews.length).toFixed(1);
+                document.getElementById('avgRating').textContent = avgRating;
+                
+                // Find top rated command
+                let topRated = '';
+                let highestRating = 0;
+                
+                Object.entries(allReviews).forEach(([command, reviews]) => {
+                    const commandAvg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+                    if (commandAvg > highestRating) {
+                        highestRating = commandAvg;
+                        topRated = command;
+                    }
+                });
+                
+                document.getElementById('topRated').textContent = topRated;
+            }
+        }
+        
+        function updateRatingDistribution() {
+            const totalReviews = Object.values(allReviews).flat();
+            const distribution = [0, 0, 0, 0, 0]; // 1-5 stars
+            
+            totalReviews.forEach(review => {
+                distribution[review.rating - 1]++;
+            });
+            
+            const maxCount = Math.max(...distribution);
+            
+            for (let i = 0; i < 5; i++) {
+                const percentage = maxCount > 0 ? (distribution[i] / maxCount) * 100 : 0;
+                document.getElementById(`rating${i + 1}`).style.width = percentage + '%';
+                document.getElementById(`count${i + 1}`).textContent = distribution[i];
+            }
+        }
+        
+        function displayReviews() {
+            const container = document.getElementById('reviewsContainer');
+            let reviewsToShow = { ...allReviews };
+            
+            // Apply filters
+            if (currentFilter === 'top') {
+                // Sort by rating
+                const sorted = Object.entries(reviewsToShow).sort(([,a], [,b]) => {
+                    const avgA = a.reduce((sum, r) => sum + r.rating, 0) / a.length;
+                    const avgB = b.reduce((sum, r) => sum + r.rating, 0) / b.length;
+                    return avgB - avgA;
+                });
+                reviewsToShow = Object.fromEntries(sorted.slice(0, 6));
+            } else if (currentFilter === 'recent') {
+                // Sort by most recent reviews
+                const sorted = Object.entries(reviewsToShow).sort(([,a], [,b]) => {
+                    const latestA = Math.max(...a.map(r => r.date));
+                    const latestB = Math.max(...b.map(r => r.date));
+                    return latestB - latestA;
+                });
+                reviewsToShow = Object.fromEntries(sorted.slice(0, 6));
+            } else if (currentFilter === 'media') {
+                const mediaCommands = ['tiktok', 'music', 'video', 'youtube', 'instagram'];
+                reviewsToShow = Object.fromEntries(
+                    Object.entries(reviewsToShow).filter(([cmd]) => 
+                        mediaCommands.some(media => cmd.toLowerCase().includes(media))
+                    )
+                );
+            } else if (currentFilter === 'ai') {
+                const aiCommands = ['ai', 'gemini', 'gpt', 'chatbot'];
+                reviewsToShow = Object.fromEntries(
+                    Object.entries(reviewsToShow).filter(([cmd]) => 
+                        aiCommands.some(ai => cmd.toLowerCase().includes(ai))
+                    )
+                );
+            }
+            
+            if (Object.keys(reviewsToShow).length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <h3>No reviews found for this filter</h3>
+                        <p>Try selecting a different filter or be the first to review!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            Object.entries(reviewsToShow).forEach(([command, reviews]) => {
+                const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+                const stars = '⭐'.repeat(Math.floor(avgRating));
+                
+                html += `
+                    <div class="command-review">
+                        <div class="command-header">
+                            <div class="command-name">
+                                <i class="fas fa-terminal"></i>
+                                /${command}
+                            </div>
+                            <div class="command-rating">
+                                <span class="stars">${stars}</span>
+                                <span class="rating-text">${avgRating}</span>
+                            </div>
+                        </div>
+                        <div class="review-count">${reviews.length} review${reviews.length !== 1 ? 's' : ''}</div>
+                        <div class="recent-reviews">
+                            ${reviews.slice(0, 2).map(review => `
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <span class="reviewer-name">${review.userName}</span>
+                                        <span class="review-date">${new Date(review.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="review-text">"${review.review}"</div>
+                                </div>
+                            `).join('')}
+                            ${reviews.length > 2 ? `<small style="opacity: 0.6;">... and ${reviews.length - 2} more reviews</small>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function filterReviews(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayReviews();
+        }
+        
+        function showAddReviewModal() {
+            alert('Review submission feature coming soon! For now, reviews are displayed from the community database.');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReviews();
+            
+            // Auto-refresh every 60 seconds
+            setInterval(loadReviews, 60000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOHI-BOT-HUB</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .features {
+            padding: 5rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features h2 {
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #64ffda;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats {
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #64ffda;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+        
+        .footer {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateY(-20px);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <section class="hero">
+        <div class="hero-content">
+            <div class="logo">🤖</div>
+            <h1>TOHI-BOT-HUB</h1>
+            <p>
+                The Ultimate Facebook Messenger Bot Experience<br>
+                180+ Commands • AI Integration • Multi-Language Support
+            </p>
+            <div class="buttons">
+                <a href="dashboard.html" class="btn btn-primary">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Open Dashboard
+                </a>
+                <a href="reviews.html" class="btn btn-secondary">
+                    <i class="fas fa-star"></i>
+                    View Reviews
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="features">
+        <div class="container">
+            <h2>Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI Integration</h3>
+                    <p>Advanced AI chatbot with Gemini, GPT integration for intelligent conversations</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3>Media Download</h3>
+                    <p>Download videos, music from TikTok, YouTube, Instagram, and more platforms</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Group Management</h3>
+                    <p>Advanced moderation tools, user management, and automated group features</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>Custom Themes</h3>
+                    <p>15+ beautiful console themes to personalize your bot experience</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Multi-Language</h3>
+                    <p>Support for English, Bengali, Vietnamese, Arabic, and more languages</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Security Features</h3>
+                    <p>Advanced admin controls, user blacklist, and anti-spam protection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="stats">
+        <div class="container">
+            <h2 style="margin-bottom: 2rem;">Live Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number" id="commands">180+</span>
+                    <div class="stat-label">Commands</div>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number" id="users">0</span>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number" id="groups">0</span>
+                    <div class="stat-label">Groups</div>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-number" id="uptime">24/7</span>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 TOHI-BOT-HUB. Created with ❤️ by TOHIDUL</p>
+            <p>Made for Replit Community</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Load real-time stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('users').textContent = data.users || 0;
+                    document.getElementById('groups').textContent = data.threads || 0;
+                }
+                
+                const botResponse = await fetch('/api/bot-info');
+                if (botResponse.ok) {
+                    const botData = await botResponse.json();
+                    document.getElementById('commands').textContent = botData.commands || '180+';
+                    
+                    const uptime = Math.floor(botData.uptime / 3600);
+                    document.getElementById('uptime').textContent = uptime > 0 ? uptime + 'h' : '24/7';
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadStats();
+            
+            // Update stats every 30 seconds
+            setInterval(loadStats, 30000);
+        });
+    </script>
+</body>
+</html>

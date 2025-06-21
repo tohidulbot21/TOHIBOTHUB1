@@ -1,0 +1,70 @@
+ERR! uploadAttachment Error: ESOCKETTIMEDOUT
+ERR! uploadAttachment     at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/request/request.js:816:19)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at ClientRequest.emit (node:events:518:28)
+ERR! uploadAttachment     at TLSSocket.emitRequestTimeout (node:_http_client:849:9)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at TLSSocket.emit (node:events:530:35)
+ERR! uploadAttachment     at Socket._onTimeout (node:net:595:8)
+ERR! uploadAttachment     at listOnTimeout (node:internal/timers:581:17)
+ERR! uploadAttachment     at process.processTimers (node:internal/timers:519:7)
+ERR! uploadAttachment  Error: ESOCKETTIMEDOUT
+ERR! uploadAttachment     at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/request/request.js:816:19)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at ClientRequest.emit (node:events:518:28)
+ERR! uploadAttachment     at TLSSocket.emitRequestTimeout (node:_http_client:849:9)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at TLSSocket.emit (node:events:530:35)
+ERR! uploadAttachment     at Socket._onTimeout (node:net:595:8)
+ERR! uploadAttachment     at listOnTimeout (node:internal/timers:581:17)
+ERR! uploadAttachment     at process.processTimers (node:internal/timers:519:7) {
+ERR! uploadAttachment   code: 'ESOCKETTIMEDOUT',
+ERR! uploadAttachment   connect: false
+ERR! uploadAttachment }
+ERR! uploadAttachment Error: ESOCKETTIMEDOUT
+ERR! uploadAttachment     at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/request/request.js:816:19)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at ClientRequest.emit (node:events:518:28)
+ERR! uploadAttachment     at TLSSocket.emitRequestTimeout (node:_http_client:849:9)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at TLSSocket.emit (node:events:530:35)
+ERR! uploadAttachment     at Socket._onTimeout (node:net:595:8)
+ERR! uploadAttachment     at listOnTimeout (node:internal/timers:581:17)
+ERR! uploadAttachment     at process.processTimers (node:internal/timers:519:7)
+ERR! uploadAttachment  Error: ESOCKETTIMEDOUT
+ERR! uploadAttachment     at ClientRequest.<anonymous> (/home/runner/workspace/node_modules/request/request.js:816:19)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at ClientRequest.emit (node:events:518:28)
+ERR! uploadAttachment     at TLSSocket.emitRequestTimeout (node:_http_client:849:9)
+ERR! uploadAttachment     at Object.onceWrapper (node:events:632:28)
+ERR! uploadAttachment     at TLSSocket.emit (node:events:530:35)
+ERR! uploadAttachment     at Socket._onTimeout (node:net:595:8)
+ERR! uploadAttachment     at listOnTimeout (node:internal/timers:581:17)
+ERR! uploadAttachment     at process.processTimers (node:internal/timers:519:7) {
+ERR! uploadAttachment   code: 'ESOCKETTIMEDOUT',
+ERR! uploadAttachment   connect: false
+ERR! uploadAttachment }
+Unhandled Rejection at: Promise {
+  <rejected> Error: ENOENT: no such file or directory, unlink '/home/runner/workspace/modules/commands/cache/video.mp4'
+      at Object.unlinkSync (node:fs:1885:11)
+      at /home/runner/workspace/modules/commands/autoDownload.js:106:37
+      at /home/runner/workspace/includes/login/src/sendMessage.js:337:13
+      at /home/runner/workspace/includes/login/src/sendMessage.js:66:12
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'unlink',
+    path: '/home/runner/workspace/modules/commands/cache/video.mp4'
+  }
+} reason: Error: ENOENT: no such file or directory, unlink '/home/runner/workspace/modules/commands/cache/video.mp4'
+    at Object.unlinkSync (node:fs:1885:11)
+    at /home/runner/workspace/modules/commands/autoDownload.js:106:37
+    at /home/runner/workspace/includes/login/src/sendMessage.js:337:13
+    at /home/runner/workspace/includes/login/src/sendMessage.js:66:12
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'unlink',
+  path: '/home/runner/workspace/modules/commands/cache/video.mp4'
+}
+[UnhandledRejection] ENOENT: no such file or directory, unlink '/home/runner/workspace/modules/commands/cache/video.mp4'

@@ -1,0 +1,98 @@
+# VIETNAMESE LANGUAGE
+# Nếu bạn muốn xuống dòng, hãy dùng\n. VD: SpermLord\nCatalizcs.
+# Sau khi thay đổi, bạn phải khởi động lại bot để có hiệu lực.
+# Đặt kí tự # ở đầu mỗi câu nếu bạn không muốn code chạy những dòng đó.
+# Thanks to CatalizCS & Yan Maglinte for translate to Vietnamese!
+# Đã thêm văn bản khác của Yan Maglinte! Một số có thể không hiển thị từ các tệp khác nếu chúng không có tệp này.
+
+# includes/listen.js
+
+listen.startLoadEnvironment=Tiến hành khởi tạo biến môi trường...
+listen.loadedEnvironmentThread=Đã tải thành công biến môi trường nhóm
+listen.loadedEnvironmentUser=Đã tải thành công biến môi trường người dùng
+listen.successLoadEnvironment=Đã khởi tạo biến môi trường thành công
+listen.failLoadEnvironment=Khởi tạo biến môi trường không thành công, lỗi: %1
+
+# includes/controller/currencies.js
+
+currencies.needObjectOrArray=Phải là một Array hoặc Object hoặc có thể là cả hai
+currencies.needObject=Phải là một Object
+currencies.needNumber= Phải là một con số
+
+# includes/controller/threads.js
+
+threads.needObjectOrArray=Phải là một Array hoặc Object hoặc có thể là cả hai
+threads.needObject=Phải là một Object
+
+# includes/controller/users.js
+
+users.needObjectOrArray=Phải là một Array hoặc Object hoặc có thể là cả hai
+users.needObject=Phải là một Object
+
+# includes/handle/handleCommand.js
+
+handleCommand.userBanned=Hiện tại bạn đang bị cấm sử dụng bot!\n%1\n%2
+handleCommand.threadBanned=Hiện tại nhóm của bạn đang bị cấm sử dụng bot!\n%1\n%2
+handleCommand.commandNotExist=Lệnh bạn sử dụng không tồn tại, có phải là lệnh "%1" hay không?
+handleCommand.commandThreadBanned=Nhóm bạn đã bị cấm sử dụng lệnh "%1"
+handleCommand.commandUserBanned=Bạn đã bị cấm sử dụng lệnh "%1"
+handleCommand.threadNotAllowNSFW=Nhóm của bạn không được phép sử dụng những lệnh NSFW
+handleCommand.cantGetInfoThread=Không thể lấy thông tin của nhóm, lỗi: %1
+handleCommand.permssionNotEnough=Bạn không đủ quyền hạn để có thể sử dụng lệnh "%1"
+handleCommand.cantSetMessageReaction=Đã có lỗi xảy ra không mong muốn tại setMessageReaction, lỗi: %1
+handleCommand.notFoundLanguage=Không tìm thấy ngôn ngữ hỗ trợ cho module %1s
+handleCommand.executeCommand=[ %1 ] Lệnh sử dụng: %2 bởi người dùng: %3 tại nhóm: %4 | Args đi kèm: %5 | Thời gian xử lý: %6ms
+handleCommand.commandError=Đã xảy ra lỗi không mong muốn trong khi thực thi lệnh %1, lỗi: %2
+handleCommand.notMatched=⚠Lệnh này không yêu cầu PREFIX để bắt đầu.
+handleCommand.noPrefix=Lệnh này không có thuộc tính command config "usePrefix"
+handleCommand.commandNotFound=Lệnh bạn đã sử dụng không tồn tại.
+handleCommand.notFoundLanguage=Không tìm thấy ngôn ngữ bạn sử dụng! Hãy đảm bảo kiểm tra các ngôn ngữ có sẵn
+
+# includes/handle/handleCommandEvent.js
+
+handleCommandEvent.moduleError=Đã xảy ra lỗi không mong muốn tại lệnh %1, lỗi: %2
+
+# includes/handle/handleCreateDatabase.js
+
+handleCreateDatabase.newThread=nhóm mới: %1
+handleCreateDatabase.newUser=người dùng mới: %1
+
+# includes/handle/handleEvent.js
+
+handleEvent.executeEvent=[ %1 ] Event được thực thi: %2 tại nhóm: %3 | Thời gian xử lý: %4ms
+handleEvent.eventError=Đã xảy ra lỗi không mong muốn trong khi thực thi event %1, lỗi: %12
+
+# includes/handle/handleReaction.js
+
+handleReaction.missingValue=Thiếu dữ liệu để có thể thực thi phản hồi lại câu trả lời của bạn
+handleReaction.executeError=Đã xảy ra lỗi không mong muốn khi đang thực thi trả lời câu hỏi bạn, lỗi: %1
+
+# includes/handle/handleReply.js
+
+handleReply.missingValue=Thiếu dữ liệu để có thể thực thi phản hồi lại câu trả lời của bạn
+handleReply.executeError=Đã xảy ra lỗi không mong muốn khi đang thực thi trả lời câu hỏi bạn, lỗi: %1
+
+# includes/handle/handleSchedule.js
+
+handleSchedule.exectuteError=Đã xảy ra lỗi không mong muốn trong lúc schedule tại module %1, lỗi: %2
+
+# utils/index.js
+
+utils.throwError=[!] Lệnh bạn đang sử dụng không đúng cú pháp, vui lòng sử dụng %1help %2 để biết thêm chi tiết cách sử dụng
+
+# slot command
+
+slot.missingInput=[ SLOT ] Số tiền đặt cược không được để trống hoặc là số âm
+slot.moneyBetNotEnough=[ SLOT ] Số tiền bạn đặt lớn hơn hoặc bằng số dư của bạn!
+slot.limitBet=[ SLOT ] Số coin đặt không được dưới 50$!
+slot.returnWin=🎰 %1 | %2 | %3 🎰\nBạn đã thắng với %4$
+slot.returnLose=🎰 %1 | %2 | %3 🎰\nBạn đã thua và mất %4$
+
+# work command
+work.job1=Bạn đã làm việc như một %1 và kiếm được %2$
+work.job2=Bạn đã hoàn thành công việc %1 và nhận được %2$
+work.job3=Công việc %1 của bạn đã trả cho bạn %2$
+work.job4=Bạn đã hoàn thành công việc như một %1, kiếm được %2$
+work.job5=Ca làm việc %1 của bạn đã kết thúc, bạn nhận được %2$
+work.cooldown=Bạn cần đợi thêm %1 phút nữa trước khi làm việc lại
+work.notEnoughMoney=Bạn không có đủ tiền để làm việc

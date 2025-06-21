@@ -1,0 +1,19 @@
+{
+  "users": {
+    "100092006324917": {
+      "name": "User_324917",
+      "STK": "1000125",
+      "password": "9FLCE6",
+      "createTime": "2025-06-12T10:55:04.816Z"
+    }
+  },
+  "transactions": [
+    {
+      "type": "withdraw",
+      "from": "100092006324917",
+      "amount": 1000,
+      "timestamp": "2025-06-12T11:22:38.331Z"
+    }
+  ],
+  "nextAccountNumber": 1000001
+}

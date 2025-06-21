@@ -1,0 +1,44 @@
+─────────────────────────────────────╮
+│        🚀 COMMAND EXECUTED 🚀       │
+╰─────────────────────────────────────╯
+📋 Group Name: —͟͟͞͞𝐂𝐘𝐁𝐄𝐑 ☢️_𖣘 -𝐁𝐎𝐓 ⚠️ 𝑻𝑬𝑨𝑴_ ☢️
+👤 User: MD Tohidul Islam
+🆔 UID: 100092006324917
+⚡ Command: /approve
+📊 Status: ✅ SUCCESS
+⏰ Time: Jun 20, 2025, 06:39:58 PM
+────────────────────────────────────────
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Group 9854213417975440 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Group 9854213417975440 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Group 9854213417975440 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Command al blocked in unapproved group 9854213417975440
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+ERR! sendMessage {
+ERR! sendMessage   __ar: 1,
+ERR! sendMessage   error: 3370026,
+ERR! sendMessage   errorSummary: "Couldn't send",
+ERR! sendMessage   errorDescription: 'Not allowed by admins.',
+ERR! sendMessage   rid: 'AoJYTTrc6Bjotq9n1Oo9T6f',
+ERR! sendMessage   payload: null,
+ERR! sendMessage   lid: '7518010404020522043'
+ERR! sendMessage }
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 23895263330101140 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Unknown event type: read_receipt
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 23895263330101140 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 23895263330101140 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Command ik blocked in unapproved group 23895263330101140
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allowing
+⫸ TBH ➤ [ DEBUG ] Group 28208759422100905 not fully approved, but allow

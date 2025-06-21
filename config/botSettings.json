@@ -1,0 +1,20 @@
+
+{
+  "SAFETY_MODE": true,
+  "RATE_LIMITING": {
+    "ENABLED": true,
+    "MIN_MESSAGE_INTERVAL": 8000,
+    "MAX_QUEUE_SIZE": 50,
+    "BLOCK_DURATION": 1800000
+  },
+  "ERROR_HANDLING": {
+    "SILENT_FAILURES": true,
+    "LOG_RATE_LIMITS": false,
+    "IGNORE_SPAM_ERRORS": true
+  },
+  "AUTO_RECOVERY": {
+    "ENABLED": true,
+    "RESTART_ON_CRITICAL_ERROR": false,
+    "COOLDOWN_PERIOD": 300000
+  }
+}
