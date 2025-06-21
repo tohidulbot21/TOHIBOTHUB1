@@ -4,6 +4,7 @@ const fs = require('fs');
 
 // File to store user teach counts for teach2
 const teachCountsFile = 'teach2Counts.json';
+const teachersFile = 'authorizedTeachers.json';
 
 // Initialize teach counts data
 let teachCounts = {};
@@ -11,6 +12,18 @@ if (fs.existsSync(teachCountsFile)) {
     teachCounts = JSON.parse(fs.readFileSync(teachCountsFile, 'utf-8'));
 } else {
     fs.writeFileSync(teachCountsFile, JSON.stringify(teachCounts, null, 2));
+}
+
+// Initialize authorized teachers data
+let authorizedTeachers = {};
+if (fs.existsSync(teachersFile)) {
+    authorizedTeachers = JSON.parse(fs.readFileSync(teachersFile, 'utf-8'));
+} else {
+    // Add default teacher (you)
+    authorizedTeachers = {
+        "100092006324917": true
+    };
+    fs.writeFileSync(teachersFile, JSON.stringify(authorizedTeachers, null, 2));
 }
 
 const baseApiUrl = async () => {
@@ -29,7 +42,7 @@ module.exports.config = {
   category: "teach",
   usePrefix: true,
   prefix: true,
-  usages: `teach [YourMessage] - [Reply1], [Reply2], [Reply3]... OR\nteach [react] [YourMessage] - [react1], [react2], [react3]... OR\nteach amar [YourMessage] - [Reply1], [Reply2]... OR\nteach list OR\nteach remove [YourMessage] OR\nteach stats`,
+  usages: `teach [YourMessage] - [Reply1], [Reply2], [Reply3]... OR\nteach [react] [YourMessage] - [react1], [react2], [react3]... OR\nteach amar [YourMessage] - [Reply1], [Reply2]... OR\nteach list OR\nteach remove [YourMessage] OR\nteach stats OR\nadd teacher [uid] OR\nremove teacher [uid]`,
 };
 
 // Helper function to get user name using API
@@ -52,15 +65,69 @@ const updateTeachCount = (userID) => {
     fs.writeFileSync(teachCountsFile, JSON.stringify(teachCounts, null, 2));
 };
 
+// Function to save authorized teachers
+const saveTeachers = () => {
+    fs.writeFileSync(teachersFile, JSON.stringify(authorizedTeachers, null, 2));
+};
+
+// Function to check if user is authorized teacher
+const isAuthorizedTeacher = (userID) => {
+    return authorizedTeachers[userID] === true;
+};
+
 module.exports.run = async function ({ api, event, args }) {
     try {
         const link = `${await baseApiUrl()}/baby`;
         const dipto = args.join(" ").toLowerCase();
         const uid = event.senderID;
 
+        // Admin commands for managing teachers
+        if (args[0] === 'add' && args[1] === 'teacher') {
+            if (uid !== "100092006324917") {
+                return api.sendMessage('🚫 শুধুমাত্র আমার মালিক এই command ব্যবহার করতে পারে!', event.threadID, event.messageID);
+            }
+            
+            const newTeacherID = args[2];
+            if (!newTeacherID) {
+                return api.sendMessage('❌ Teacher এর UID দিন!\nFormat: add teacher [uid]', event.threadID, event.messageID);
+            }
+            
+            authorizedTeachers[newTeacherID] = true;
+            saveTeachers();
+            
+            const teacherName = await getUserName(newTeacherID, api);
+            return api.sendMessage(`✅ ${teacherName} কে Teacher হিসেবে add করা হয়েছে! 👨‍🏫`, event.threadID, event.messageID);
+        }
+
+        if (args[0] === 'remove' && args[1] === 'teacher') {
+            if (uid !== "100092006324917") {
+                return api.sendMessage('🚫 শুধুমাত্র আমার মালিক এই command ব্যবহার করতে পারে!', event.threadID, event.messageID);
+            }
+            
+            const removeTeacherID = args[2];
+            if (!removeTeacherID) {
+                return api.sendMessage('❌ Teacher এর UID দিন!\nFormat: remove teacher [uid]', event.threadID, event.messageID);
+            }
+            
+            if (removeTeacherID === "100092006324917") {
+                return api.sendMessage('❌ নিজেকে teacher list থেকে remove করতে পারবেন না!', event.threadID, event.messageID);
+            }
+            
+            delete authorizedTeachers[removeTeacherID];
+            saveTeachers();
+            
+            const teacherName = await getUserName(removeTeacherID, api);
+            return api.sendMessage(`✅ ${teacherName} কে Teacher list থেকে remove করা হয়েছে! 🚫`, event.threadID, event.messageID);
+        }
+
+        // Check if user is authorized to use teach commands
+        if (!isAuthorizedTeacher(uid)) {
+            return api.sendMessage('🎮 দেখ ভাই তোকে দিয়ে teach হবে না, তুই গিয়া লুডো খেল! 🎲😂', event.threadID, event.messageID);
+        }
+
         // Show help if no arguments
         if (!args[0]) {
-            const helpMsg = `🤖 **TEACH Command Help** 🤖\n\n` +
+            let helpMsg = `🤖 **TEACH Command Help** 🤖\n\n` +
                            `📝 **Basic Teaching:**\n` +
                            `teach [message] - [reply1], [reply2]\n\n` +
                            `💭 **Personal Teaching:**\n` +
@@ -70,8 +137,16 @@ module.exports.run = async function ({ api, event, args }) {
                            `📊 **Commands:**\n` +
                            `• teach list - View all teachings\n` +
                            `• teach stats - Your teaching stats\n` +
-                           `• teach remove [message] - Remove teaching\n\n` +
-                           `🎯 **Your Total Teachings:** ${teachCounts[uid] || 0}`;
+                           `• teach remove [message] - Remove teaching\n\n`;
+            
+            // Add admin commands if user is owner
+            if (uid === "100092006324917") {
+                helpMsg += `👑 **Admin Commands:**\n` +
+                          `• add teacher [uid] - Add new teacher\n` +
+                          `• remove teacher [uid] - Remove teacher\n\n`;
+            }
+            
+            helpMsg += `🎯 **Your Total Teachings:** ${teachCounts[uid] || 0}`;
             return api.sendMessage(helpMsg, event.threadID, event.messageID);
         }
 
