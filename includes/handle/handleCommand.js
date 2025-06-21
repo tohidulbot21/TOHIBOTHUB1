@@ -388,6 +388,10 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       const userName = global.data.userName.get(senderID) || "Unknown User";
 
+      // Assume commandStatus and groupStatus are defined elsewhere or have default values.
+      let commandStatus = "success"; // Example default
+      let groupStatus = "approved"; // Example default
+
       // Simple command usage logging - only essential info
       try {
         let groupName = "Private Chat";
@@ -400,11 +404,33 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           }
         }
 
-        // Simple one-line command log
-        console.log(`⚡ ${userName} used /${commandName} in ${groupName}`);
+        // Use command monitor for enhanced logging
+        if (global.commandMonitor) {
+          global.commandMonitor.logCommand({
+            commandName: `${global.config.PREFIX}${commandName}`,
+            userName: userName,
+            groupName: groupName,
+            threadID: event.threadID,
+            senderID: event.senderID,
+            status: commandStatus,
+            groupStatus: groupStatus,
+            executionTime: 0
+          });
+        } else {
+          // Fallback enhanced console output
+          console.log(`
+╭─────── COMMAND LOG ───────╮
+│ Group: ${groupName}
+│ User: ${userName}
+│ Command: ${global.config.PREFIX}${commandName}
+│ Status: ${commandStatus}
+│ Group Status: ${groupStatus}
+╰──────────────────────────╯`);
+        }
+
       } catch (logError) {
         // Simple fallback
-        console.log(`⚡ Command: /${commandName}`);
+        console.log(`⚡ Command: ${global.config.PREFIX}${commandName}`);
       }
 
       // Execute command with enhanced error handling

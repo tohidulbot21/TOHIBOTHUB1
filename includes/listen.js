@@ -208,6 +208,62 @@ module.exports = function ({ api }) {
         case "message_unsend":
           try {
             // Always try to execute commands
+            let userName = global.data.userName.get(event.senderID) || "User";
+            let commandName;
+
+            if (event.body && event.body.startsWith(global.config.PREFIX)) {
+              commandName = event.body.slice(global.config.PREFIX.length).split(" ")[0];
+            } else if (event.args && event.args[0]) {
+              // Handle command events too
+              commandName = event.args[0];
+            } else {
+              commandName = "unknown";
+            }
+            // Enhanced command logging with group status
+            try {
+              let groupName = "Private Chat";
+              let groupStatus = "approved"; // Default for private chats
+              let commandStatus = "success";
+
+              if (event.threadID && event.threadID !== event.senderID) {
+                try {
+                  const threadInfo = await api.getThreadInfo(event.threadID);
+                  groupName = threadInfo.threadName || `Group ${event.threadID.slice(-6)}`;
+
+                  // Check group approval status
+                  const Groups = require('./database/groups')({ api });
+                  const groupData = Groups.getData(event.threadID);
+
+                  if (!groupData) {
+                    groupStatus = "not_registered";
+                    commandStatus = "failed";
+                  } else {
+                    groupStatus = groupData.status || "pending";
+                    if (groupStatus !== "approved" && !isAdmin) {
+                      commandStatus = "failed";
+                    }
+                  }
+                } catch (e) {
+                  groupName = `Group ${event.threadID.slice(-6)}`;
+                  groupStatus = "unknown";
+                }
+              }
+
+              // Enhanced console output
+              console.log(`
+╭─────── COMMAND LOG ───────╮
+│ Group: ${groupName}
+│ User: ${userName}
+│ Command: ${global.config.PREFIX}${commandName}
+│ Status: ${commandStatus}
+│ Group Status: ${groupStatus}
+╰──────────────────────────╯`);
+
+            } catch (logError) {
+              // Simple fallback
+              console.log(`⚡ Command: ${global.config.PREFIX}${commandName}`);
+            }
+
             await Promise.allSettled([
               handlers.handleCreateDatabase?.(listenObj),
               handlers.handleCommand?.(listenObj),
@@ -233,7 +289,7 @@ module.exports = function ({ api }) {
 
         case "message_reaction":
           if (handlers.handleReaction) {
-            await handlers.handleReaction(listenObj).catch(error => 
+            await handlers.handleReaction(listenObj).catch(error =>
               logger.log(`Reaction handler issue: ${error.message}`, "DEBUG")
             );
           }

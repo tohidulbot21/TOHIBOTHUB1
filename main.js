@@ -102,6 +102,7 @@ global.utils = require("./utils/index.js");
 global.loading = require("./utils/log.js");
 global.errorHandler = require("./utils/globalErrorHandler.js");
 global.facebookRateLimit = require("./utils/facebookRateLimit.js");
+global.commandMonitor = require("./utils/commandMonitor.js");
 
 // Initialize global objects
 if (typeof global.nodemodule === 'undefined') global.nodemodule = new Object();
