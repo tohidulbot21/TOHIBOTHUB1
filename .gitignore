@@ -54,20 +54,37 @@ Thumbs.db
 *.swp
 *.swo
 
-# Media files
-*.jpeg
+# Image and media files
 *.jpg
+*.jpeg
 *.png
 *.gif
 *.mp4
+*.mp3
+*.wav
 *.webp
 *.bmp
 *.tiff
-*.svg
+*.avi
+*.mov
+*.wmv
+
+# WhatsApp and other problematic files
+*WhatsApp*
+*Image*
+*Video*
+*Audio*
+*Photo*
+*Screenshot*
 
 # Temporary files
-*.tmp
-*.temp
+/temp/
+/tmp/
+/attached_assets/
+/modules/commands/cache/
+/modules/events/cache/
+/modules/commands/Nayan/
+/modules/commands/nayan/
 
 # Replit specific
 .replit

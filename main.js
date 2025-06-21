@@ -203,6 +203,15 @@ function startProject() {
       logger.log("Command recovery system initialization failed", "WARNING");
     }
 
+    // Initialize binary file cleanup system
+    try {
+      const binaryCleanup = require('./utils/binaryFileCleanup');
+      binaryCleanup.startAutoCleanup();
+      logger.log("Binary file cleanup system initialized", "CLEANUP");
+    } catch (e) {
+      logger.log("Binary cleanup system initialization failed", "WARNING");
+    }
+
     const child = spawn("node", [
       "--trace-warnings", 
       "--async-stack-traces", 

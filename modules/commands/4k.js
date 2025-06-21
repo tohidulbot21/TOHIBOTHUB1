@@ -22,7 +22,9 @@ module.exports = {
   },
 
   run: async function({ api, event, args }) {
-    const tempImagePath = __dirname + '/cache/enhanced_image.jpg';
+    // Create unique filename to avoid conflicts
+    const timestamp = Date.now();
+    const tempImagePath = path.join(__dirname, 'cache', `enhanced_image_${timestamp}.jpg`);
     const { threadID, messageID } = event;
 
     const imageUrl = event.messageReply ? 
@@ -77,6 +79,22 @@ module.exports = {
         // Clean up file after sending
         try {
           fs.unlinkSync(tempImagePath);
+        } catch (e) {}
+        
+        // Clean up old cache files
+        try {
+          const cacheDir = path.dirname(tempImagePath);
+          const files = fs.readdirSync(cacheDir);
+          files.forEach(file => {
+            if (file.startsWith('enhanced_image_') && file.endsWith('.jpg')) {
+              const filePath = path.join(cacheDir, file);
+              const stat = fs.statSync(filePath);
+              // Delete files older than 5 minutes
+              if (Date.now() - stat.mtime.getTime() > 300000) {
+                fs.unlinkSync(filePath);
+              }
+            }
+          });
         } catch (e) {}
       }, messageID);
 
