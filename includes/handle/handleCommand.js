@@ -135,9 +135,15 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
         let isRejected = false;
 
         try {
+          // Enhanced approval check with auto-migration
           isApproved = Groups.isApproved(event.threadID);
           isPending = Groups.isPending(event.threadID);
           isRejected = Groups.isRejected(event.threadID);
+          
+          // If approved through auto-migration, allow immediately
+          if (isApproved) {
+            logger.log(`Group ${event.threadID} approved (including auto-migration)`, "SUCCESS");
+          }
         } catch (error) {
           logger.log(`Groups system error, checking legacy: ${error.message}`, "DEBUG");
           
@@ -148,13 +154,30 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
             const config = require(configPath);
             
             // Check multiple possible locations for approved groups
-            isApproved = config.APPROVAL?.approvedGroups?.includes(String(event.threadID)) || 
-                         config.APPROVAL?.approvedGroups?.includes(event.threadID) ||
-                         config.approvedGroups?.includes(String(event.threadID)) ||
-                         config.approvedGroups?.includes(event.threadID) || false;
+            const isLegacyApproved = config.APPROVAL?.approvedGroups?.includes(String(event.threadID)) || 
+                                    config.APPROVAL?.approvedGroups?.includes(event.threadID) ||
+                                    config.approvedGroups?.includes(String(event.threadID)) ||
+                                    config.approvedGroups?.includes(event.threadID);
             
-            if (isApproved) {
-              logger.log(`Legacy approved group found: ${event.threadID}`, "SUCCESS");
+            if (isLegacyApproved) {
+              // Force migrate and approve
+              try {
+                Groups.setData(event.threadID, {
+                  threadID: event.threadID,
+                  threadName: "Legacy Force Migrated",
+                  status: "approved",
+                  memberCount: 0,
+                  createdAt: new Date().toISOString(),
+                  settings: { allowCommands: true, autoApprove: false }
+                });
+                isApproved = true;
+                logger.log(`Legacy group auto-migrated: ${event.threadID}`, "SUCCESS");
+              } catch (migrateError) {
+                logger.log(`Migration failed: ${migrateError.message}`, "WARN");
+                isApproved = isLegacyApproved;
+              }
+            } else {
+              isApproved = false;
             }
           } catch (configError) {
             logger.log(`Config check failed: ${configError.message}`, "DEBUG");

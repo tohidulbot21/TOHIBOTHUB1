@@ -21,29 +21,56 @@ module.exports.run = async function({ api, event, Groups }) {
     // Check if message starts with prefix (is a command)
     if (!event.body || !event.body.startsWith(prefix)) return;
 
-    // Check group approval status with legacy support
+    // Check group approval status with enhanced auto-migration
     let isApproved, isPending, isRejected;
     
     try {
+      // This will auto-migrate legacy approved groups
       isApproved = Groups.isApproved(threadID);
       isPending = Groups.isPending(threadID);
       isRejected = Groups.isRejected(threadID);
+      
+      // If auto-migrated, skip further checks
+      if (isApproved) {
+        return true;
+      }
     } catch (error) {
       console.log(`Groups system error for ${threadID}:`, error.message);
-      // Fallback to legacy config check
+      // Enhanced fallback to legacy config check
       try {
         const configPath = require('path').join(__dirname, "../../config.json");
         delete require.cache[require.resolve(configPath)];
         const config = require(configPath);
         
-        isApproved = config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
-                     config.APPROVAL?.approvedGroups?.includes(threadID) ||
-                     config.approvedGroups?.includes(String(threadID)) ||
-                     config.approvedGroups?.includes(threadID) || false;
-        isPending = false;
+        // Check if it's a legacy approved group
+        const isLegacyApproved = config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
+                                config.APPROVAL?.approvedGroups?.includes(threadID) ||
+                                config.approvedGroups?.includes(String(threadID)) ||
+                                config.approvedGroups?.includes(threadID);
+        
+        if (isLegacyApproved) {
+          // Force create approved status for legacy groups
+          try {
+            Groups.setData(threadID, {
+              threadID: threadID,
+              threadName: "Legacy Group (Force Migrated)",
+              status: "approved",
+              memberCount: 0,
+              createdAt: new Date().toISOString(),
+              settings: { allowCommands: true, autoApprove: false }
+            });
+            console.log(`🔄 Force migrated legacy group: ${threadID}`);
+            return true;
+          } catch (migrateError) {
+            console.log(`Migration failed for ${threadID}:`, migrateError.message);
+          }
+        }
+        
+        isApproved = false;
+        isPending = !isLegacyApproved;
         isRejected = false;
       } catch (configError) {
-        // If everything fails, consider as pending
+        // If everything fails, consider as pending for new groups
         isApproved = false;
         isPending = true;
         isRejected = false;

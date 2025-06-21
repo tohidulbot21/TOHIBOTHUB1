@@ -173,7 +173,7 @@ module.exports = function({ api }) {
       }
     },
 
-    // Check if group is approved
+    // Check if group is approved with enhanced auto-migration
     isApproved: function(threadID) {
     try {
       const data = this.getData(threadID);
@@ -185,35 +185,37 @@ module.exports = function({ api }) {
           delete require.cache[require.resolve(configPath)];
           const config = require(configPath);
 
-          // Check in multiple possible locations
-          if (config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
-              config.APPROVAL?.approvedGroups?.includes(threadID) ||
-              config.approvedGroups?.includes(String(threadID)) ||
-              config.approvedGroups?.includes(threadID)) {
-            
-            // Create data entry for approved group and approve it
+          // Check in multiple possible locations for legacy approved groups
+          const isLegacyApproved = config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
+                                  config.APPROVAL?.approvedGroups?.includes(threadID) ||
+                                  config.approvedGroups?.includes(String(threadID)) ||
+                                  config.approvedGroups?.includes(threadID);
+
+          if (isLegacyApproved) {
+            // Auto-migrate and approve legacy groups instantly
             this.setData(threadID, {
               threadID: threadID,
-              threadName: "Legacy Approved Group",
+              threadName: "Legacy Approved Group (Auto-Migrated)",
               status: "approved",
               memberCount: 0,
               createdAt: new Date().toISOString(),
               lastUpdated: new Date().toISOString(),
               migratedAt: new Date().toISOString(),
+              isLegacyMigrated: true,
               settings: {
                 allowCommands: true,
                 autoApprove: false
               }
             });
             
-            console.log(`✅ Migrated approved group: ${threadID}`);
+            console.log(`✅ Auto-migrated legacy approved group: ${threadID}`);
             return true;
           }
         } catch (configError) {
           console.log(`Config check error for ${threadID}:`, configError.message);
         }
         
-        // If no legacy approval found, return false (group needs manual approval)
+        // New groups need manual approval
         return false;
       }
 
