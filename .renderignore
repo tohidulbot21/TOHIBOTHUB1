@@ -1,0 +1,21 @@
+
+# Render ignore file
+.git/
+.gitignore
+README.md
+*.md
+.env.example
+.vscode/
+.idea/
+logs/
+*.log
+npm-debug.log*
+temp/
+cache/
+node_modules/.cache/
+coverage/
+.nyc_output/
+*.tgz
+*.tar.gz
+.DS_Store
+Thumbs.db

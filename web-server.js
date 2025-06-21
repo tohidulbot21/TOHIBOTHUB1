@@ -6,7 +6,9 @@ const logger = require('./utils/log.js');
 class WebServer {
   constructor() {
     this.app = express();
-    this.port = process.env.PORT || 3000;
+    // Render optimization - use 0.0.0.0 for proper binding
+    this.host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    this.port = process.env.PORT || 10000;
     this.setupMiddleware();
     this.setupRoutes();
   }
@@ -62,8 +64,25 @@ class WebServer {
   }
 
   start() {
-    this.server = this.app.listen(this.port, '0.0.0.0', () => {
-      logger.log(`Web server running on port ${this.port}`, "WEBSERVER");
+    this.setupRoutes();
+
+    // Add health check endpoint for Render
+    this.app.get('/health', (req, res) => {
+      res.status(200).json({ 
+        status: 'healthy', 
+        timestamp: new Date().toISOString(),
+        service: 'TOHI-BOT-HUB'
+      });
+    });
+
+    this.server = this.app.listen(this.port, this.host, () => {
+      logger.log(`Web server running on ${this.host}:${this.port}`, "WEBSERVER");
+
+      if (process.env.RENDER_EXTERNAL_URL) {
+        logger.log(`Dashboard: ${process.env.RENDER_EXTERNAL_URL}/dashboard`, "WEBSERVER");
+      } else {
+        logger.log(`Dashboard: http://${this.host}:${this.port}/dashboard`, "WEBSERVER");
+      }
     });
 
     this.server.on('error', (error) => {

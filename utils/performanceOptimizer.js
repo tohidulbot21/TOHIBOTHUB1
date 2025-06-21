@@ -43,9 +43,12 @@ class PerformanceOptimizer {
     const memUsage = process.memoryUsage();
     const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
     
-    // If heap usage > 400MB, trigger cleanup
-    if (heapUsedMB > 400) {
-      console.log(`High memory usage detected: ${heapUsedMB.toFixed(2)}MB`);
+    // Render has limited memory - be more aggressive
+    const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID;
+    const memoryLimit = isRender ? 200 : 400; // 200MB for Render, 400MB for others
+    
+    if (heapUsedMB > memoryLimit) {
+      console.log(`High memory usage detected: ${heapUsedMB.toFixed(2)}MB (limit: ${memoryLimit}MB)`);
       
       // Force garbage collection if available
       if (global.gc && typeof global.gc === 'function') {
@@ -55,6 +58,27 @@ class PerformanceOptimizer {
       
       // Clean cache if memory is still high
       await this.cleanupCache();
+      
+      // Additional cleanup for Render
+      if (isRender) {
+        await this.renderSpecificCleanup();
+      }
+    }
+  }
+  
+  // Render-specific cleanup
+  async renderSpecificCleanup() {
+    try {
+      // Clear require cache for non-essential modules
+      Object.keys(require.cache).forEach(key => {
+        if (key.includes('node_modules') && !key.includes('express') && !key.includes('axios')) {
+          delete require.cache[key];
+        }
+      });
+      
+      console.log('Render-specific cleanup completed');
+    } catch (error) {
+      console.log('Render cleanup error:', error.message);
     }
   }
 

@@ -1,0 +1,18 @@
+
+services:
+  - type: web
+    name: tohi-bot-hub
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+    healthCheckPath: /
+    disk:
+      name: tohi-bot-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

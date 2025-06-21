@@ -33,9 +33,18 @@ console.log(chalk.bold.cyan(`
 ╱┃┃┃┃┃╭╮┣┃┣┳━┫╭╮┃┃┃┃┣━━┫╭╮┃┃┃╭╮┃
 ╱╰╯╰━┻╯╰┻━━╯╱╰━━┻━╯╰╯╱╱╰╯╰┻━┻━━╯`));
 
-// Initialize web server with enhanced error handling
+// Initialize web server with enhanced error handling and Render support
 try {
   const webServer = new WebServer();
+  
+  // Configure for Render environment
+  const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
+  if (isRender) {
+    // Use Render's PORT or default to 10000
+    process.env.PORT = process.env.PORT || '10000';
+    logger.log(`Render detected - using PORT: ${process.env.PORT}`, "WEBSERVER");
+  }
+  
   webServer.start();
   logger.log("Web server initialized successfully", "WEBSERVER");
 } catch (error) {
@@ -113,10 +122,28 @@ process.on('uncaughtException', (error) => {
   }
 });
 
-// Enhanced bot startup function
+// Enhanced bot startup function optimized for Render
 function startProject() {
   try {
     logger.log("Starting TOHI-BOT-HUB main process...", "STARTUP");
+
+    // Detect Render environment
+    const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
+    
+    if (isRender) {
+      logger.log("Render environment detected - applying optimizations", "RENDER");
+      
+      // Render-specific optimizations
+      process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+      
+      // Set memory limits for Render
+      process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=512';
+      
+      // Direct execution for Render (no child process)
+      logger.log("Running in Render mode - direct execution", "RENDER");
+      initializeBot();
+      return;
+    }
 
     // Initialize performance optimizer
     try {
@@ -137,7 +164,7 @@ function startProject() {
     const child = spawn("node", [
       "--trace-warnings", 
       "--async-stack-traces", 
-      "--max-old-space-size=3072", // Increased memory limit
+      "--max-old-space-size=512", // Reduced for Render compatibility
       "--expose-gc", // Enable garbage collection
       "index.js"
     ], {
