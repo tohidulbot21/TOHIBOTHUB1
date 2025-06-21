@@ -1,8 +1,9 @@
+
 {
-  "version": "1.8.0",
+  "version": "2.0.0",
   "language": "en",
   "DeveloperMode": true,
-  "autoCreateDB": false,
+  "autoCreateDB": true,
   "allowInbox": true,
   "autoClean": true,
   "adminOnly": false,
@@ -20,19 +21,19 @@
   },
   "commandDisabled": [],
   "eventDisabled": [],
-  "BOTNAME": "TOHI-BOT",
+  "BOTNAME": "TOHI-BOT-ENHANCED",
   "PREFIX": "%",
   "ADMINBOT": [
     "100092006324917"
   ],
   "DESIGN": {
-    "Title": "TOHI-BOT-HUB",
+    "Title": "TOHI-BOT-HUB-ENHANCED",
     "Theme": "matrix",
     "Admin": "TOHI-BOT-HUB",
-    "Credits": "TOHI-BOT-HUB Framework",
+    "Credits": "TOHI-BOT-HUB Enhanced Framework v2.0.0",
     "Setup": {
-      "Info": "Design your own custom terminal Titlebar for the title and must contain no numbers",
-      "Themes": "Customize your console effortlessly with various theme colors. Explore Aqua, Fiery, Blue, Orange, Pink, Red, Retro, Sunlight, Teen, Summer, Flower, Ghost, Purple, Rainbow, Hacker, and Matrix themes to enhance your terminal logs."
+      "Info": "Enhanced design system with advanced terminal customization",
+      "Themes": "Matrix, Hacker, Rainbow, Purple, Ghost, Summer, Flower, Teen, Sunlight, Retro, Red, Pink, Orange, Blue, Fiery, Aqua themes available"
     }
   },
   "APPSTATEPATH": "appstate.json",
@@ -47,9 +48,25 @@
     "selfListen": false,
     "online": true,
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "byPassRegion": "PNB",
+    "bypassRegion": "PRN",
     "updatePresence": true,
     "emitReady": true
+  },
+  "ENHANCED_FEATURES": {
+    "GROUP_APPROVAL_SYSTEM": true,
+    "ADVANCED_COMMAND_HANDLER": true,
+    "RATE_LIMITING": true,
+    "AUTO_CLEAN_CACHE": true,
+    "PERFORMANCE_OPTIMIZATION": true,
+    "ENHANCED_LOGGING": true,
+    "SECURITY_FEATURES": true
+  },
+  "SECURITY": {
+    "MAX_COMMANDS_PER_MINUTE": 10,
+    "COOLDOWN_BYPASS_ADMINS": true,
+    "AUTO_BAN_SPAMMERS": true,
+    "COMMAND_TIMEOUT": 60000,
+    "RATE_LIMIT_THRESHOLD": 5
   },
   "daily": {
     "cooldownTime": 43200000
@@ -59,17 +76,17 @@
   },
   "help": {
     "autoUnsend": true,
-    "delayUnsend": 20
+    "delayUnsend": 30
   },
   "adminUpdate": {
     "autoUnsend": true,
     "sendNoti": true,
-    "timeToUnsend": 10
+    "timeToUnsend": 15
   },
   "adminNoti": {
     "autoUnsend": true,
     "sendNoti": true,
-    "timeToUnsend": 10
+    "timeToUnsend": 15
   },
   "sing": {
     "YOUTUBE_API": "AIzaSyBtiD442srhczDpcg8xbhinP423BeUFXB8",
@@ -92,15 +109,18 @@
     "YOUTUBE_API": "AIzaSyDEE1-zZSRVI8lTaQOVsIAQFgL-_BJKvhk"
   },
   "logs": {
-    "enable": true
+    "enable": true,
+    "level": "enhanced"
   },
   "SYSTEM": {
-    "Framework": "TOHI-BOT-HUB",
-    "Version": "1.8.0",
+    "Framework": "TOHI-BOT-HUB-ENHANCED",
+    "Version": "2.0.0",
     "Developer": "TOHIDUL",
-    "Credits": "TOHI-BOT-HUB Advanced Bot Framework System",
+    "Credits": "TOHI-BOT-HUB Enhanced Bot Framework System v2.0.0",
     "Repository": "https://github.com/TOHI-BOT-HUB/TOHI-BOT-HUB",
-    "License": "MIT"
+    "License": "MIT",
+    "BuildDate": "2024-12-26",
+    "Enhancement": "Rebuilt with advanced features and optimizations"
   },
   "autoCleanCache": true,
   "video2": {
@@ -111,13 +131,22 @@
     "SOUNDCLOUD_API": "MMJhwmfTYJVFm9TiUdmYYyrf6Pzpzf3YN1"
   },
   "BANK_API": {
-    "BASE_URL": "http://0.0.0.0:3001/bank",
+    "BASE_URL": "http://0.0.0.0:3002/bank",
     "ENABLED": true,
-    "FALLBACK_URL": "http://localhost:3001/bank"
+    "FALLBACK_URL": "http://localhost:3002/bank",
+    "ENHANCED": true
   },
   "APPROVAL": {
     "approvedGroups": [],
     "pendingGroups": [],
-    "rejectedGroups": []
+    "rejectedGroups": [],
+    "AUTO_APPROVE": false,
+    "STRICT_MODE": true
+  },
+  "PERFORMANCE": {
+    "CACHE_CLEANUP_INTERVAL": 300000,
+    "MEMORY_LIMIT": "512MB",
+    "MAX_CONCURRENT_COMMANDS": 50,
+    "COMMAND_QUEUE_SIZE": 100
   }
 }

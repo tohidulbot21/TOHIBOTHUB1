@@ -8,19 +8,14 @@ const pkg = require('./package.json');
 const listPackage = pkg.dependencies;
 const login = require("./includes/login/index.js");
 const moment = require("moment-timezone");
-// Initialize colorful logging system first
 const logger = require("./utils/log.js");
-const rateLimitManager = require('./utils/rateLimitManager');
-
-// Enable colorful console output globally
-require("./utils/log.js"); // This will override console.log with colorful version
 const chalk = require("chalk");
 const WebServer = require('./web-server.js');
 
 /**
  * ═══════════════════════════════════════════════════════════
- *                    TOHI-BOT-HUB v1.8.0
- *          Advanced Facebook Messenger Bot Framework
+ *                    TOHI-BOT-HUB v2.0.0
+ *          Enhanced Facebook Messenger Bot Framework
  *               Created by TOHI-BOT-HUB Team
  *        GitHub: https://github.com/TOHI-BOT-HUB/TOHI-BOT-HUB
  * ═══════════════════════════════════════════════════════════
@@ -28,133 +23,45 @@ const WebServer = require('./web-server.js');
 
 // Enhanced startup banner
 console.log(chalk.bold.cyan(`
-╭━━┳━┳╮╭┳━━╮╱╭━━┳━┳━━╮╱╭╮╭┳┳┳━━╮
-╰╮╭┫┃┃╰╯┣┃┣┻━┫╭╮┃┃┣╮╭┻━┫╰╯┃┃┃╭╮┃
-╱┃┃┃┃┃╭╮┣┃┣┳━┫╭╮┃┃┃┃┣━━┫╭╮┃┃┃╭╮┃
-╱╰╯╰━┻╯╰┻━━╯╱╰━━┻━╯╰╯╱╱╰╯╰┻━┻━━╯`));
+╭━━━┳━━━┳╮╱╱╭┳━━┳━━━╮╱╭━━┳━━━┳━━━╮╱╭╮╱╭┳╮╱╭┳━━━╮
+╰╮╭╮┃╭━╮┃╰╮╭╯┃╭╮┃╭━╮┃╱╰╮╭┫╭━╮┃╭━╮┃╱┃╰╮╱╯┃╰╮╭╯┃╭━━╯
+╱┃┃┃┃┃╱┃┣╮╰╯╭┫┃┃┃╰━╯┃╱╱┃┃┃╰━╯┃┃╱┃┃╱╰╮╰╮╱╯╱┃┃╱┃╰━━╮
+╱┃┃┃┃┃╱┃┃╰╮╭╯┃┃┃┃╭━━╯╱╱┃┃┃╭━━┫┃╱┃┃╱╱╰╮┃╱╱╱┃┃╱┃╭━━╯
+╭╯╰╯┃╰━╯┃╱┃┃╱┃╰╯┃┃╱╱╱╱╱┃┃┃┃╱╱┃╰━╯┃╱╱╱┃┃╱╱╭╯╰╮┃╰━━╮
+╰━━━┻━━━╯╱╰╯╱╰━━┻╯╱╱╱╱╱╰╯╰╯╱╱╰━━━╯╱╱╱╰╯╱╱╰━━╯╰━━━╯`));
 
-// Enhanced startup sequence
 console.log(chalk.blue.bold(`
 ╔══════════════════════════════════════╗
-║          TOHI-BOT-HUB v1.8.0         ║
-║      Advanced Facebook Bot System    ║
+║          TOHI-BOT-HUB v2.0.0         ║
+║      Enhanced Facebook Bot System    ║
 ║     Created by TOHI-BOT-HUB Team     ║
-║         Optimized for Render         ║
+║         Optimized & Rebuilt          ║
 ╚══════════════════════════════════════╝
 `));
 
-// Clean up problematic files for Render deployment
-if (process.env.RENDER || process.env.RENDER_SERVICE_ID) {
-  try {
-    const problematicPaths = [
-      './attached_assets',
-      './modules/commands/cache',
-      './modules/events/cache'
-    ];
-
-    for (const dirPath of problematicPaths) {
-      if (fs.existsSync(dirPath)) {
-        // Clear binary files that cause UTF-8 decode errors
-        const files = fs.readdirSync(dirPath);
-        files.forEach(file => {
-          const filePath = path.join(dirPath, file);
-          const stat = fs.statSync(filePath);
-          if (stat.isFile() && /\.(jpe?g|png|gif|mp4|webp|bmp|tiff)$/i.test(file)) {
-            try {
-              fs.unlinkSync(filePath);
-              logger.log(`Cleaned binary file: ${file}`, "RENDER");
-            } catch (e) {
-              // Silent fail for file cleanup
-            }
-          }
-        });
-      }
-    }
-  } catch (error) {
-    logger.log(`Cleanup warning: ${error.message}`, "RENDER");
-  }
-}
-
-// Initialize web server with enhanced error handling and Render support
-try {
-  const webServer = new WebServer();
-
-  // Configure for Render environment
-  const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
-  if (isRender) {
-    // Use Render's PORT or default to 10000
-    process.env.PORT = process.env.PORT || '10000';
-    logger.log(`Render detected - using PORT: ${process.env.PORT}`, "WEBSERVER");
-  }
-
-  webServer.start();
-  logger.log("Web server initialized successfully", "WEBSERVER");
-} catch (error) {
-  logger.log(`Web server initialization failed: ${error.message}`, "WEBSERVER");
-}
-
-// Initialize bank API server
-try {
-  const { startBankAPI } = require('./includes/database/bank-api.js');
-  startBankAPI();
-  logger.log("Bank API server initialized successfully", "BANK-API");
-} catch (error) {
-  logger.log(`Bank API server initialization failed: ${error.message}`, "BANK-API");
-}
-
-// Global system initialization
-logger.log("Initializing TOHI-BOT-HUB System...", "STARTER");
-
-// Enhanced global objects
-global.utils = require("./utils/index.js");
-global.loading = require("./utils/log.js");
-global.errorHandler = require("./utils/globalErrorHandler.js");
-global.facebookRateLimit = require("./utils/facebookRateLimit.js");
-
-// Initialize global objects only if they don't exist
-if (typeof global.nodemodule === 'undefined') global.nodemodule = new Object();
-if (typeof global.config === 'undefined') global.config = new Object();
-if (typeof global.configModule === 'undefined') global.configModule = new Object();
-if (typeof global.moduleData === 'undefined') global.moduleData = new Array();
-if (typeof global.language === 'undefined') global.language = new Object();
-if (typeof global.account === 'undefined') global.account = new Object();
-
-// Enhanced global error handlers
+// Initialize global error handlers first
 process.on('unhandledRejection', (reason, promise) => {
   if (reason && (
     reason.toString().includes('ENOENT') ||
     reason.toString().includes('rate limit') ||
-    reason.toString().includes('1357031') ||
-    reason.toString().includes('1390008') ||
-    reason.toString().includes('Request failed with status code 401') ||
-    reason.toString().includes('Request failed with status code 404') ||
-    reason.toString().includes('Request failed with status code 500') ||
-    reason.toString().includes('HandleEvent timeout') ||
-    reason.toString().includes('Reply timeout') ||
-    reason.toString().includes('Event timeout') ||
     reason.toString().includes('timeout') ||
     reason.toString().includes('ECONNRESET') ||
     reason.toString().includes('ETIMEDOUT') ||
     reason.message?.includes('status code 401') ||
     reason.message?.includes('status code 404') ||
-    reason.message?.includes('status code 500') ||
-    reason.message?.includes('timeout')
+    reason.message?.includes('status code 500')
   )) {
-    // Ignore common Facebook API, file system, timeout, and external API errors
-    return;
+    return; // Ignore common errors
   }
   logger.log(`Unhandled Rejection: ${reason}`, "ERROR");
 });
 
 process.on('uncaughtException', (error) => {
   if (error.code === 'ENOENT' && error.path && error.path.includes('cache')) {
-    // Ignore cache file errors
-    return;
+    return; // Ignore cache file errors
   }
-
   logger.log(`Uncaught Exception: ${error.message}`, "ERROR");
 
-  // Handle critical errors that need restart
   const criticalErrors = ['ECONNRESET', 'ENOTFOUND', 'socket hang up'];
   const isCritical = criticalErrors.some(err => error.message && error.message.includes(err));
 
@@ -164,95 +71,45 @@ process.on('uncaughtException', (error) => {
   }
 });
 
-// Enhanced bot startup function optimized for Render
-function startProject() {
-  try {
-    logger.log("Starting TOHI-BOT-HUB main process...", "STARTUP");
-
-    // Detect Render environment
-    const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
-
-    if (isRender) {
-      logger.log("Render environment detected - applying optimizations", "RENDER");
-
-      // Render-specific optimizations
-      process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-
-      // Set memory limits for Render
-      process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=512';
-
-      // Direct execution for Render (no child process)
-      logger.log("Running in Render mode - direct execution", "RENDER");
-      initializeBot();
-      return;
-    }
-
-    // Initialize performance optimizer
-    try {
-      const performanceOptimizer = require('./utils/performanceOptimizer');
-      performanceOptimizer.startAutoOptimization();
-    } catch (e) {
-      logger.log("Performance optimizer initialization failed", "WARNING");
-    }
-
-    // Initialize command recovery system
-    try {
-      const commandRecovery = require('./utils/commandRecovery');
-      commandRecovery.startAutoCleanup();
-    } catch (e) {
-      logger.log("Command recovery system initialization failed", "WARNING");
-    }
-
-    // Initialize binary file cleanup system
-    try {
-      const binaryCleanup = require('./utils/binaryFileCleanup');
-      binaryCleanup.startAutoCleanup();
-      logger.log("Binary file cleanup system initialized", "CLEANUP");
-    } catch (e) {
-      logger.log("Binary cleanup system initialization failed", "WARNING");
-    }
-
-    // Force migration check for legacy approved groups
-    try {
-      const Groups = require('./includes/database/groups')({ api: null });
-      const migrated = Groups.migrateFromConfig();
-      if (migrated) {
-        logger.log("Legacy approved groups migrated successfully", "MIGRATION");
-      }
-    } catch (e) {
-      logger.log("Legacy migration check failed", "WARNING");
-    }
-
-    const child = spawn("node", [
-      "--trace-warnings", 
-      "--async-stack-traces", 
-      "--max-old-space-size=512", // Reduced for Render compatibility
-      "--expose-gc", // Enable garbage collection
-      "index.js"
-    ], {
-      cwd: process.cwd(),
-      stdio: "inherit",
-      shell: true
-    });
-
-    child.on("close", (codeExit) => {
-      if (codeExit !== 0) {
-        logger.log(`Process exited with code ${codeExit}, restarting...`, "RESTART");
-        setTimeout(() => startProject(), 5000);
-      }
-    });
-
-    child.on("error", (error) => {
-      if (!shouldIgnoreError(error)) {
-        logger.log(`Child process error: ${error.message}`, "ERROR");
-      }
-    });
-
-  } catch (error) {
-    logger.log(`Startup error: ${error.message}`, "ERROR");
-    setTimeout(() => startProject(), 10000);
+// Initialize web server
+try {
+  const webServer = new WebServer();
+  const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
+  if (isRender) {
+    process.env.PORT = process.env.PORT || '10000';
+    logger.log(`Render detected - using PORT: ${process.env.PORT}`, "WEBSERVER");
   }
+  webServer.start();
+  logger.log("Web server initialized successfully", "WEBSERVER");
+} catch (error) {
+  logger.log(`Web server initialization failed: ${error.message}`, "WEBSERVER");
 }
+
+// Initialize bank API
+try {
+  const { startBankAPI } = require('./includes/database/bank-api.js');
+  startBankAPI();
+  logger.log("Bank API server initialized successfully", "BANK-API");
+} catch (error) {
+  logger.log(`Bank API server initialization failed: ${error.message}`, "BANK-API");
+}
+
+// Global system initialization
+logger.log("Initializing Enhanced TOHI-BOT-HUB System...", "STARTER");
+
+// Enhanced global objects
+global.utils = require("./utils/index.js");
+global.loading = require("./utils/log.js");
+global.errorHandler = require("./utils/globalErrorHandler.js");
+global.facebookRateLimit = require("./utils/facebookRateLimit.js");
+
+// Initialize global objects
+if (typeof global.nodemodule === 'undefined') global.nodemodule = new Object();
+if (typeof global.config === 'undefined') global.config = new Object();
+if (typeof global.configModule === 'undefined') global.configModule = new Object();
+if (typeof global.moduleData === 'undefined') global.moduleData = new Array();
+if (typeof global.language === 'undefined') global.language = new Object();
+if (typeof global.account === 'undefined') global.account = new Object();
 
 // Enhanced client object
 global.client = {
@@ -266,9 +123,8 @@ global.client = {
   mainPath: process.cwd(),
   configPath: new String(),
 
-  // Enhanced time functions
   getTime: function(option) {
-    const timezone = "Asia/Manila";
+    const timezone = "Asia/Dhaka";
     const format = {
       "seconds": "ss",
       "minutes": "mm", 
@@ -280,7 +136,6 @@ global.client = {
       "fullYear": "DD/MM/YYYY",
       "fullTime": "HH:mm:ss DD/MM/YYYY"
     };
-
     return moment.tz(timezone).format(format[option] || "HH:mm:ss DD/MM/YYYY");
   },
 
@@ -301,7 +156,7 @@ global.data = {
   allThreadID: new Array()
 };
 
-// Enhanced theme loading system
+// Enhanced theme loading
 const { getThemeColors } = require("./utils/log.js");
 const { main, secondary, tertiary, html } = getThemeColors();
 
@@ -309,12 +164,10 @@ try {
   const themePath = './includes/cover/html.json';
   let themeData;
 
-  // Load or create theme configuration
   if (fs.existsSync(themePath)) {
     try {
       const rawData = fs.readFileSync(themePath, 'utf8');
       themeData = rawData.trim() ? JSON.parse(rawData) : null;
-
       if (!themeData || !themeData.THEME_COLOR) {
         themeData = null;
       }
@@ -326,7 +179,6 @@ try {
     themeData = null;
   }
 
-  // Create default theme if needed
   if (!themeData) {
     const defaultTheme = {
       THEME_COLOR: html || "#1702CF",
@@ -337,12 +189,10 @@ try {
       text: "#ffffff",
       accent: "#1702CF"
     };
-
     fs.ensureDirSync(path.dirname(themePath));
     fs.writeFileSync(themePath, JSON.stringify(defaultTheme, null, 2));
     logger.log("Theme configuration created successfully", "THEME");
   }
-
 } catch (error) {
   logger.log(`Theme system error: ${error.message}`, "THEME");
 }
@@ -378,7 +228,7 @@ for (const property in listPackage) {
   }
 }
 
-// Enhanced language loading system
+// Enhanced language loading
 try {
   const langFile = fs.readFileSync(
     `${process.cwd()}/languages/${global.config.language || "en"}.lang`, 
@@ -413,15 +263,14 @@ global.getText = function(...args) {
   const langText = global.language;
 
   if (!langText.hasOwnProperty(args[0])) {
-    throw new Error(`Language key not found: ${args[0]}`);
+    return `Language key not found: ${args[0]}`;
   }
 
   let text = langText[args[0]][args[1]];
   if (typeof text === 'undefined') {
-    throw new Error(`Text key not found: ${args[1]}`);
+    return `Text key not found: ${args[1]}`;
   }
 
-  // Replace placeholders
   for (let i = args.length - 1; i > 0; i--) {
     const regEx = new RegExp(`%${i}`, 'g');
     text = text.replace(regEx, args[i + 1]);
@@ -452,12 +301,10 @@ try {
     appState = JSON.parse(fileContent);
   }
 
-  // Validate appstate structure
   if (!Array.isArray(appState) || appState.length === 0) {
     throw new Error("AppState is empty or invalid format");
   }
 
-  // Check for required cookies
   const hasUserCookie = appState.some(c => c.key === "c_user" || c.key === "i_user");
   const hasSessionCookie = appState.some(c => c.key === "xs" || c.key === "fr");
 
@@ -476,9 +323,8 @@ try {
   appState = [];
 }
 
-// Enhanced bot initialization function
+// Main bot initialization function
 function initializeBot() {
-  // Check if appstate is valid before attempting login
   if (!appState || !Array.isArray(appState) || appState.length === 0) {
     logger.log("❌ Cannot start bot: No valid appstate provided", "LOGIN");
     logger.log("Please ensure your appstate.json contains valid Facebook cookies", "LOGIN");
@@ -532,10 +378,8 @@ function initializeBot() {
     global.client.api = api;
     global.config.version = botConfig.version;
 
-    // Load commands
+    // Load commands and events
     await loadCommands();
-
-    // Load events  
     await loadEvents();
 
     // Start listening
@@ -543,7 +387,7 @@ function initializeBot() {
   });
 }
 
-// Enhanced command loading function
+// Enhanced command loading
 async function loadCommands() {
   const commandsPath = `${global.client.mainPath}/modules/commands`;
   const listCommand = fs.readdirSync(commandsPath)
@@ -562,7 +406,6 @@ async function loadCommands() {
       const module = require(`${commandsPath}/${command}`);
       const { config } = module;
 
-      // Validation
       if (!config?.name) {
         throw new Error(`Command ${command} has no name property`);
       }
@@ -579,17 +422,14 @@ async function loadCommands() {
         throw new Error(`Command ${config.name} already loaded`);
       }
 
-      // Handle dependencies
       if (config.dependencies) {
         await handleDependencies(config.dependencies);
       }
 
-      // Handle environment config
       if (config.envConfig) {
         handleEnvConfig(config.name, config.envConfig);
       }
 
-      // Execute onLoad function
       if (module.onLoad) {
         try {
           await module.onLoad({ api: global.client.api });
@@ -598,7 +438,6 @@ async function loadCommands() {
         }
       }
 
-      // Register command
       if (module.handleEvent) {
         global.client.eventRegistered.push(config.name);
       }
@@ -620,7 +459,7 @@ async function loadCommands() {
   logger.log(`Commands loaded: ${loadedCount} successful, ${failedCount} failed`, "COMMAND");
 }
 
-// Enhanced event loading function
+// Enhanced event loading
 async function loadEvents() {
   const eventsPath = path.join(global.client.mainPath, 'modules/events');
   const events = fs.readdirSync(eventsPath)
@@ -645,17 +484,14 @@ async function loadEvents() {
         throw new Error(`Event ${config.name} already loaded`);
       }
 
-      // Handle dependencies
       if (config.dependencies) {
         await handleDependencies(config.dependencies);
       }
 
-      // Handle environment config
       if (config.envConfig) {
         handleEnvConfig(config.name, config.envConfig);
       }
 
-      // Execute onLoad function
       if (onLoad) {
         try {
           await onLoad({ api: global.client.api });
@@ -694,7 +530,6 @@ async function handleDependencies(dependencies) {
         cwd: join(process.cwd(), 'node_modules')
       });
 
-      // Clear require cache
       Object.keys(require.cache).forEach(key => delete require.cache[key]);
 
     } catch (error) {
@@ -713,7 +548,6 @@ function handleEnvConfig(moduleName, envConfig) {
     global.config[moduleName][key] = global.config[moduleName][key] ?? value;
   }
 
-  // Update config file
   try {
     const configPath = botConfig;
     configPath[moduleName] = envConfig;
@@ -727,39 +561,32 @@ function handleEnvConfig(moduleName, envConfig) {
 async function startListening(api) {
   console.log(tertiary(`\n──BOT READY─●`));
 
-  // Display startup statistics
   const startupTime = ((Date.now() - global.client.timeStart) / 1000).toFixed(2);
-  logger.log(`✓ System ready! Commands: ${global.client.commands.size}, Events: ${global.client.events.size}`, "READY");
+  logger.log(`✓ Enhanced System Ready! Commands: ${global.client.commands.size}, Events: ${global.client.events.size}`, "READY");
   logger.log(`⏱️ Startup time: ${startupTime}s`, "READY");
 
-  // Log bot info at the very end
   logger.log(
-    `[ BOT_INFO ] success!\n[ NAME ]: ${global.config.BOTNAME || "Bot Messenger"} \n[ BotID ]: ${api.getCurrentUserID()}\n[ PREFIX ]: ${global.config.PREFIX}`,
+    `[ BOT_INFO ] Enhanced Bot Ready!\n[ NAME ]: ${global.config.BOTNAME || "TOHI-BOT"} \n[ BotID ]: ${api.getCurrentUserID()}\n[ PREFIX ]: ${global.config.PREFIX}\n[ VERSION ]: 2.0.0 Enhanced`,
     "LOADED"
   );
 
   // Load listener
   const listener = require('./includes/listen.js');
 
-
-
-  // Start listening with full error logging
+  // Start enhanced listening
   global.handleListen = api.listenMqtt(async (error, event) => {
     if (error) {
-      // Handle critical login errors
       if (error.error === 'Not logged in.' || error.error === 'Not logged in') {
         logger.log("Authentication lost, please re-login", "AUTH");
         return process.exit(1);
       }
 
-      // Log all errors except ready state
       if (error.type !== 'ready') {
         logger.log(`Listen error: ${error}`, "LISTEN");
       }
       return;
     }
 
-    // Handle events
     if (event && event.type !== 'ready') {
       return listener({ api })(event);
     }
@@ -770,7 +597,7 @@ async function startListening(api) {
 (async () => {
   try {
     console.log(tertiary(`\n──DATABASE─●`));
-    logger.log("✓ Connected to JSON database successfully!", "DATABASE");
+    logger.log("✓ Connected to Enhanced JSON database successfully!", "DATABASE");
 
     // Start bot initialization
     initializeBot();
@@ -780,48 +607,19 @@ async function startListening(api) {
   }
 })();
 
+// Enhanced script cleanup
+require('./utils/scriptCleanup');
+
+// Initialize groups data
+if (typeof global.client !== 'undefined' && global.client.api) {
+  global.data.groups = require('./includes/database/groups')({ api: global.client.api });
+}
+
 /**
  * ═══════════════════════════════════════════════════════════
- *                     TOHI-BOT-HUB
+ *                 ENHANCED TOHI-BOT-HUB v2.0.0
  *              © 2024 TOHI-BOT-HUB Team
  *        GitHub: https://github.com/TOHI-BOT-HUB/TOHI-BOT-HUB
  *              Do not remove credits
  * ═══════════════════════════════════════════════════════════
  */
-
-// Global error handlers
-process.on('unhandledRejection', (reason, promise) => {
-  const globalErrorHandler = require('./utils/globalErrorHandler');
-
-  // Check if this is an ignorable error
-  if (reason && (
-    reason.toString().includes('Rate limit') ||
-    reason.toString().includes('does not exist in Database') ||
-    reason.error === 3252001 ||
-    reason.error === 1390008 ||
-    reason.toString().includes('shouldIgnoreError is not defined') ||
-    reason.toString().includes("You can't use this feature at the moment")
-  )) {
-    // Log but don't crash for these errors - these are common Facebook API issues
-    return;
-  }
-
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  globalErrorHandler.logError(reason, 'UnhandledRejection');
-});
-
-process.on('uncaughtException', (error) => {
-  const globalErrorHandler = require('./utils/globalErrorHandler');
-  console.error('Uncaught Exception:', error);
-  globalErrorHandler.logError(error, 'UncaughtException');
-});
-
-// Global client properties already initialized above
-
-// Initialize script cleanup utility
-require('./utils/scriptCleanup');
-
-// Initialize groups data only after api is available
-if (typeof global.client !== 'undefined' && global.client.api) {
-  global.data.groups = require('./includes/database/groups')({ api: global.client.api });
-}

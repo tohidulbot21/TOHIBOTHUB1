@@ -1,72 +1,143 @@
+
 module.exports.config = {
-	name: "restart",
-	version: "7.0.0",
-	permission: 2,
-	credits: "TOHI-BOT-HUB",
-	usePrefix: false,
-	description: "restart bot system",
-	commandCategory: "admin",
-	usages: "",
-	cooldowns: 0,
-	dependencies: {
-		"process": ""
-	}
+  name: "restart",
+  version: "2.0.0",
+  hasPermssion: 2,
+  credits: "TOHI-BOT-HUB",
+  description: "Enhanced restart command for TOHI-BOT",
+  usePrefix: true,
+  commandCategory: "Admin",
+  usages: "restart [reason]",
+  cooldowns: 10,
+  dependencies: {
+    "fs-extra": "",
+    "path": ""
+  }
 };
-module.exports.run = async function({ api, event, args, Threads, Users, Currencies, models }) {
-  const { spawn } = require("child_process");
-  const process = require("process");
+
+module.exports.run = async function ({ api, event, args, getText }) {
   const { threadID, messageID, senderID } = event;
-  
-  // Check if user is admin (permission level 2)
-  if (!global.config.ADMINBOT.includes(senderID)) {
-    return api.sendMessage("❌ You don't have permission to restart the bot. Only admins can use this command.", threadID, messageID);
-  }
-  
+  const { execSync } = require('child_process');
+  const chalk = require('chalk');
+  const moment = require('moment-timezone');
+
   try {
-    // Send restart message
-    const restartMsg = await api.sendMessage(`🔄 Bot restart শুরু হচ্ছে...\n⏳ সম্পূর্ণ system restart করা হচ্ছে...`, threadID);
+    const reason = args.join(' ') || 'Manual restart by admin';
+    const restartTime = moment().tz('Asia/Dhaka').format('DD/MM/YYYY HH:mm:ss');
     
-    // Save current process info
-    const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
-    
-    setTimeout(async () => {
-      try {
-        // Update message before restart
-        await api.editMessage("✅ Bot restart সম্পূর্ণ! নতুন process শুরু হচ্ছে...", restartMsg.messageID, threadID);
-        
-        if (isRender) {
-          // For Render environment - force restart
-          console.log("[RESTART] Restarting bot on Render...");
-          process.exit(0); // Exit cleanly, let Render restart
-        } else {
-          // For other environments - spawn new process
-          console.log("[RESTART] Spawning new bot process...");
-          
-          const child = spawn("node", ["main.js"], {
-            cwd: process.cwd(),
-            detached: true,
-            stdio: "inherit",
-            shell: true
+    // Send restart notification
+    const restartMsg = `
+╔══════════════════════════════════════╗
+║          🔄 BOT RESTARTING 🔄         ║
+╚══════════════════════════════════════╝
+
+⚙️ **TOHI-BOT Enhanced v2.0.0**
+🔄 **Status:** Restarting System...
+👤 **Admin:** ${await api.getUserInfo(senderID)[senderID]?.name || 'Admin'}
+📝 **Reason:** ${reason}
+⏰ **Time:** ${restartTime}
+
+⌛ **Please wait 10-15 seconds...**
+✅ **Bot will be back online shortly!**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💫 TOHI-BOT-HUB Enhanced Framework v2.0.0
+`;
+
+    api.sendMessage(restartMsg, threadID, async (err, info) => {
+      if (err) return console.log(err);
+      
+      console.log(chalk.yellow('━'.repeat(50)));
+      console.log(chalk.red.bold('🔄 ENHANCED BOT RESTART INITIATED'));
+      console.log(chalk.yellow('━'.repeat(50)));
+      console.log(chalk.cyan(`👤 Admin: ${senderID}`));
+      console.log(chalk.cyan(`📝 Reason: ${reason}`));
+      console.log(chalk.cyan(`⏰ Time: ${restartTime}`));
+      console.log(chalk.yellow('━'.repeat(50)));
+      console.log(chalk.green('🚀 Restarting Enhanced TOHI-BOT System...'));
+      console.log(chalk.yellow('━'.repeat(50)));
+
+      // Enhanced restart with cleanup
+      setTimeout(() => {
+        try {
+          // Clear require cache for clean restart
+          Object.keys(require.cache).forEach(key => {
+            if (!key.includes('node_modules')) {
+              delete require.cache[key];
+            }
           });
+
+          // Clear global data
+          if (global.client) {
+            global.client.commands.clear();
+            global.client.events.clear();
+            global.client.cooldowns.clear();
+          }
+
+          // Save restart info
+          const fs = require('fs-extra');
+          const restartInfo = {
+            timestamp: Date.now(),
+            admin: senderID,
+            reason: reason,
+            threadID: threadID,
+            messageID: info.messageID
+          };
           
-          // Detach the child process
-          child.unref();
+          fs.writeFileSync('./includes/database/data/lastRestart.json', JSON.stringify(restartInfo, null, 2));
+
+          // Force process restart
+          process.exit(0);
           
-          // Exit current process after delay
-          setTimeout(() => {
-            process.exit(0);
-          }, 1000);
+        } catch (error) {
+          console.log(chalk.red('❌ Restart failed:', error.message));
+          api.sendMessage('❌ Enhanced restart failed. Please try again.', threadID);
         }
-        
-      } catch (error) {
-        console.error("[RESTART] Error during restart:", error.message);
-        // Fallback restart
-        process.exit(1);
-      }
-    }, 2000);
-    
+      }, 3000);
+    });
+
   } catch (error) {
-    console.error("[RESTART] Restart command error:", error.message);
-    api.sendMessage(`❌ Restart করতে error হয়েছে: ${error.message}`, threadID, messageID);
+    console.log(chalk.red('❌ Enhanced restart command error:', error));
+    api.sendMessage('❌ Enhanced restart failed. Please check logs.', threadID, messageID);
   }
-}
+};
+
+module.exports.handleEvent = async function ({ api, event }) {
+  // Handle post-restart notification
+  const fs = require('fs-extra');
+  const restartInfoPath = './includes/database/data/lastRestart.json';
+  
+  if (fs.existsSync(restartInfoPath)) {
+    try {
+      const restartInfo = JSON.parse(fs.readFileSync(restartInfoPath, 'utf8'));
+      
+      // Check if this is a fresh restart (within 30 seconds)
+      if (Date.now() - restartInfo.timestamp < 30000) {
+        const moment = require('moment-timezone');
+        const completeTime = moment().tz('Asia/Dhaka').format('DD/MM/YYYY HH:mm:ss');
+        
+        const successMsg = `
+╔══════════════════════════════════════╗
+║         ✅ BOT RESTART COMPLETE ✅     ║
+╚══════════════════════════════════════╝
+
+🎉 **TOHI-BOT Enhanced v2.0.0**
+✅ **Status:** Online & Ready!
+🔄 **Restart Time:** ${completeTime}
+⚡ **Commands:** ${global.client?.commands?.size || 0}
+🎯 **Events:** ${global.client?.events?.size || 0}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💫 Enhanced system ready for commands!
+`;
+
+        await api.sendMessage(successMsg, restartInfo.threadID);
+        
+        // Remove restart info file
+        fs.unlinkSync(restartInfoPath);
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+};
