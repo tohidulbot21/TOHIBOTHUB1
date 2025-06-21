@@ -238,7 +238,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
       const threadData = global.data.threadData.get(threadID) || {};
       const prefix = threadData.PREFIX || global.config.PREFIX || "/";
 
-      // Check if message starts with prefix
+      // Check if message starts with bot prefix only
       if (!event.body.startsWith(prefix)) return;
 
       // Parse command
@@ -246,6 +246,10 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
       const commandName = args.shift()?.toLowerCase();
 
       if (!commandName) return;
+
+      // Only process if this is a valid bot command with our prefix
+      const botPrefix = global.config.PREFIX || "%";
+      if (!event.body.startsWith(botPrefix)) return;
 
       // Get command (check both name and aliases)
       let command = commands.get(commandName);
@@ -388,56 +392,98 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       const userName = global.data.userName.get(senderID) || "Unknown User";
 
-      // Assume commandStatus and groupStatus are defined elsewhere or have default values.
-      let commandStatus = "success"; // Example default
-      let groupStatus = "approved"; // Example default
-
-      // Simple command usage logging - only essential info
+      // Enhanced stylish console logging
       try {
         let groupName = "Private Chat";
+        let groupStatus = "N/A";
+        
         if (event.threadID && event.threadID !== event.senderID) {
           try {
             const threadInfo = await api.getThreadInfo(event.threadID);
             groupName = threadInfo.threadName || `Group ${event.threadID.slice(-6)}`;
+            
+            // Get group approval status
+            const Groups = require('../database/groups')({ api: global.client.api });
+            const groupData = Groups.getData(event.threadID);
+            groupStatus = groupData ? groupData.status : "unapproved";
           } catch (e) {
             groupName = `Group ${event.threadID.slice(-6)}`;
+            groupStatus = "unknown";
           }
-        }
-
-        // Use command monitor for enhanced logging
-        if (global.commandMonitor) {
-          global.commandMonitor.logCommand({
-            commandName: `${global.config.PREFIX}${commandName}`,
-            userName: userName,
-            groupName: groupName,
-            threadID: event.threadID,
-            senderID: event.senderID,
-            status: commandStatus,
-            groupStatus: groupStatus,
-            executionTime: 0
-          });
         } else {
-          // Fallback enhanced console output
-          console.log(`
-╭─────── COMMAND LOG ───────╮
-│ Group: ${groupName}
-│ User: ${userName}
-│ Command: ${global.config.PREFIX}${commandName}
-│ Status: ${commandStatus}
-│ Group Status: ${groupStatus}
-╰──────────────────────────╯`);
+          groupStatus = "inbox";
         }
 
+        // Stylish console output
+        console.log(`
+╔═══════════════════════════════════════╗
+║          🤖 TOHI-BOT COMMAND LOG      ║
+╠═══════════════════════════════════════╣
+║ 📋 Group Name: ${groupName.padEnd(20, ' ')} ║
+║ 👤 User: ${userName.padEnd(26, ' ')} ║
+║ ⚡ Command: ${(prefix + commandName).padEnd(22, ' ')} ║
+║ 📊 Status: SUCCESS                    ║
+║ 🔐 Group Status: ${groupStatus.toUpperCase().padEnd(15, ' ')} ║
+╚═══════════════════════════════════════╝`);
       } catch (logError) {
-        // Simple fallback
-        console.log(`⚡ Command: ${global.config.PREFIX}${commandName}`);
+        // Simple fallback with stylish format
+        console.log(`
+╔═══════════════════════════════════════╗
+║          🤖 TOHI-BOT COMMAND LOG      ║
+╠═══════════════════════════════════════╣
+║ ⚡ Command: ${(prefix + commandName).padEnd(22, ' ')} ║
+║ 📊 Status: SUCCESS                    ║
+╚═══════════════════════════════════════╝`);
       }
 
       // Execute command with enhanced error handling
       try {
         await executeCommand(command, Obj, commandName);
       } catch (error) {
-        logger.log(`Command execution error: ${error.message}`, "DEBUG");
+        // Enhanced error logging with stylish format
+        try {
+          let groupName = "Private Chat";
+          let groupStatus = "N/A";
+          
+          if (event.threadID && event.threadID !== event.senderID) {
+            try {
+              const threadInfo = await api.getThreadInfo(event.threadID);
+              groupName = threadInfo.threadName || `Group ${event.threadID.slice(-6)}`;
+              
+              const Groups = require('../database/groups')({ api: global.client.api });
+              const groupData = Groups.getData(event.threadID);
+              groupStatus = groupData ? groupData.status : "unapproved";
+            } catch (e) {
+              groupName = `Group ${event.threadID.slice(-6)}`;
+              groupStatus = "unknown";
+            }
+          } else {
+            groupStatus = "inbox";
+          }
+
+          // Stylish error log
+          console.log(`
+╔═══════════════════════════════════════╗
+║          🤖 TOHI-BOT COMMAND LOG      ║
+╠═══════════════════════════════════════╣
+║ 📋 Group Name: ${groupName.padEnd(20, ' ')} ║
+║ 👤 User: ${userName.padEnd(26, ' ')} ║
+║ ⚡ Command: ${(prefix + commandName).padEnd(22, ' ')} ║
+║ ❌ Status: FAILED                     ║
+║ 🔐 Group Status: ${groupStatus.toUpperCase().padEnd(15, ' ')} ║
+║ 🐛 Error: ${error.message.substring(0, 25).padEnd(25, ' ')} ║
+╚═══════════════════════════════════════╝`);
+        } catch (logError) {
+          // Simple fallback error log
+          console.log(`
+╔═══════════════════════════════════════╗
+║          🤖 TOHI-BOT COMMAND LOG      ║
+╠═══════════════════════════════════════╣
+║ ⚡ Command: ${(prefix + commandName).padEnd(22, ' ')} ║
+║ ❌ Status: FAILED                     ║
+║ 🐛 Error: ${error.message.substring(0, 25).padEnd(25, ' ')} ║
+╚═══════════════════════════════════════╝`);
+        }
 
         // Handle specific errors
         if (error.message.includes('rate limit')) {
@@ -450,7 +496,6 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
         // Handle mention errors silently
         if (error.message.includes('Mention') || error.message.includes('not found in message string')) {
-          logger.log(`Mention handling warning: ${error.message}`, "DEBUG");
           return; // Don't send error message for mention issues
         }
 
