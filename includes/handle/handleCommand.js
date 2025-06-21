@@ -247,10 +247,6 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       if (!commandName) return;
 
-      // Only process if this is a valid bot command with our prefix
-      const botPrefix = global.config.PREFIX || "%";
-      if (!event.body.startsWith(botPrefix)) return;
-
       // Get command (check both name and aliases)
       let command = commands.get(commandName);
       if (!command) {
@@ -265,6 +261,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
         }
       }
 
+      // If command doesn't exist, silently ignore (don't log or process)
       if (!command) return;
 
       const commandConfig = command.config;
@@ -392,7 +389,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       const userName = global.data.userName.get(senderID) || "Unknown User";
 
-      // Enhanced stylish console logging
+      // Enhanced stylish console logging (only for valid commands)
       try {
         let groupName = "Private Chat";
         let groupStatus = "N/A";
@@ -414,7 +411,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           groupStatus = "inbox";
         }
 
-        // Stylish console output
+        // Stylish console output for valid commands only
         console.log(`
 ╔═══════════════════════════════════════╗
 ║          🤖 TOHI-BOT COMMAND LOG      ║
