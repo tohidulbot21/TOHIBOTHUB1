@@ -25,12 +25,34 @@ module.exports.run = async function ({ api, event, args }) {
 
   try {
     switch (command) {
+      case "migrate": {
+        api.sendMessage("🔄 পুরানো approved groups migrate করা হচ্ছে...", threadID, messageID);
+        
+        // Force migration
+        Groups.updateSettings({ migrated: false });
+        const migrated = Groups.migrateFromConfig();
+        
+        if (migrated) {
+          const approvedGroups = Groups.getApprovedGroups();
+          api.sendMessage(
+            `✅ Migration সম্পূর্ণ!\n\n` +
+            `📊 Total approved groups: ${approvedGroups.length}\n` +
+            `🔄 এখন সব পুরানো approved groups এ bot কাজ করবে।`,
+            threadID, messageID
+          );
+        } else {
+          api.sendMessage("❌ Migration করতে সমস্যা হয়েছে!", threadID, messageID);
+        }
+        break;
+      }
+
       case "help": {
         const helpMsg = `📋 APPROVE COMMAND HELP:
 
 🔸 /approve — বর্তমান গ্রুপ approve করুন
 🔸 /approve list — সব approved গ্রুপের লিস্ট
 🔸 /approve pending — pending গ্রুপের লিস্ট
+🔸 /approve migrate — পুরানো approved groups migrate করুন
 🔸 /approve reject <groupID> — নির্দিষ্ট গ্রুপ reject করুন
 🔸 /approve help — এই help মেসেজ
 

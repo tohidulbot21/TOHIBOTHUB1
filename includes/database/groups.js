@@ -180,18 +180,40 @@ module.exports = function({ api }) {
 
       // If no data exists, check legacy config.json approval system
       if (!data) {
-        const { configPath } = global.client;
-        if (configPath) {
+        try {
+          const configPath = require('path').join(__dirname, "../../config.json");
           delete require.cache[require.resolve(configPath)];
           const config = require(configPath);
 
-          if (config.APPROVAL?.approvedGroups?.includes(String(threadID))) {
-            // Create data entry for approved group
-            this.createData(threadID);
-            this.approveGroup(threadID);
+          // Check in multiple possible locations
+          if (config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
+              config.APPROVAL?.approvedGroups?.includes(threadID) ||
+              config.approvedGroups?.includes(String(threadID)) ||
+              config.approvedGroups?.includes(threadID)) {
+            
+            // Create data entry for approved group and approve it
+            this.setData(threadID, {
+              threadID: threadID,
+              threadName: "Legacy Approved Group",
+              status: "approved",
+              memberCount: 0,
+              createdAt: new Date().toISOString(),
+              lastUpdated: new Date().toISOString(),
+              migratedAt: new Date().toISOString(),
+              settings: {
+                allowCommands: true,
+                autoApprove: false
+              }
+            });
+            
+            console.log(`✅ Migrated approved group: ${threadID}`);
             return true;
           }
+        } catch (configError) {
+          console.log(`Config check error for ${threadID}:`, configError.message);
         }
+        
+        // If no legacy approval found, return false (group needs manual approval)
         return false;
       }
 
@@ -284,60 +306,104 @@ module.exports = function({ api }) {
         }
 
         const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+        let migratedCount = 0;
 
-        if (config.APPROVAL) {
-          // Migrate approved groups
-          if (config.APPROVAL.approvedGroups) {
-            config.APPROVAL.approvedGroups.forEach(threadID => {
-              if (!this.getData(threadID)) {
-                this.setData(threadID, {
-                  threadID: threadID,
-                  threadName: "Migrated Group",
+        // Check multiple possible config structures
+        const approvedSources = [
+          config.APPROVAL?.approvedGroups,
+          config.approvedGroups,
+          config.APPROVED_GROUPS
+        ];
+
+        const pendingSources = [
+          config.APPROVAL?.pendingGroups,
+          config.pendingGroups,
+          config.PENDING_GROUPS
+        ];
+
+        const rejectedSources = [
+          config.APPROVAL?.rejectedGroups,
+          config.rejectedGroups,
+          config.REJECTED_GROUPS
+        ];
+
+        // Migrate approved groups from any source
+        approvedSources.forEach(source => {
+          if (Array.isArray(source)) {
+            source.forEach(threadID => {
+              const id = String(threadID);
+              if (!this.getData(id)) {
+                this.setData(id, {
+                  threadID: id,
+                  threadName: "Legacy Approved Group",
+                  memberCount: 0,
                   status: "approved",
+                  createdAt: new Date().toISOString(),
                   migratedAt: new Date().toISOString(),
-                  settings: { allowCommands: true }
+                  settings: { allowCommands: true, autoApprove: false }
                 });
+                migratedCount++;
               }
             });
           }
+        });
 
-          // Migrate pending groups
-          if (config.APPROVAL.pendingGroups) {
-            config.APPROVAL.pendingGroups.forEach(threadID => {
-              if (!this.getData(threadID)) {
-                this.setData(threadID, {
-                  threadID: threadID,
-                  threadName: "Migrated Group",
+        // Migrate pending groups
+        pendingSources.forEach(source => {
+          if (Array.isArray(source)) {
+            source.forEach(threadID => {
+              const id = String(threadID);
+              if (!this.getData(id)) {
+                this.setData(id, {
+                  threadID: id,
+                  threadName: "Legacy Pending Group",
+                  memberCount: 0,
                   status: "pending",
+                  createdAt: new Date().toISOString(),
                   migratedAt: new Date().toISOString(),
-                  settings: { allowCommands: false }
+                  settings: { allowCommands: false, autoApprove: false }
                 });
+                migratedCount++;
               }
             });
           }
+        });
 
-          // Migrate rejected groups
-          if (config.APPROVAL.rejectedGroups) {
-            config.APPROVAL.rejectedGroups.forEach(threadID => {
-              if (!this.getData(threadID)) {
-                this.setData(threadID, {
-                  threadID: threadID,
-                  threadName: "Migrated Group",
+        // Migrate rejected groups
+        rejectedSources.forEach(source => {
+          if (Array.isArray(source)) {
+            source.forEach(threadID => {
+              const id = String(threadID);
+              if (!this.getData(id)) {
+                this.setData(id, {
+                  threadID: id,
+                  threadName: "Legacy Rejected Group",
+                  memberCount: 0,
                   status: "rejected",
+                  createdAt: new Date().toISOString(),
                   migratedAt: new Date().toISOString(),
-                  settings: { allowCommands: false }
+                  settings: { allowCommands: false, autoApprove: false }
                 });
+                migratedCount++;
               }
             });
           }
-        }
+        });
 
         // Migrate auto approve settings
         if (config.AUTO_APPROVE) {
           this.updateSettings({
             autoApprove: {
-              enabled: config.AUTO_APPROVE.enabled || true,
+              enabled: config.AUTO_APPROVE.enabled !== false,
               autoApproveMessage: config.AUTO_APPROVE.autoApproveMessage || false
+            }
+          });
+        } else {
+          // Default to enabled for backwards compatibility
+          this.updateSettings({
+            autoApprove: {
+              enabled: true,
+              autoApproveMessage: false
             }
           });
         }
@@ -345,7 +411,10 @@ module.exports = function({ api }) {
         // Mark as migrated
         this.updateSettings({ migrated: true });
 
-        console.log("✅ Migration from config.json completed successfully!");
+        if (migratedCount > 0) {
+          console.log(`✅ Migration completed! Migrated ${migratedCount} groups from config.json`);
+        }
+        
         return true;
       } catch (error) {
         console.error("Error migrating from config:", error);
