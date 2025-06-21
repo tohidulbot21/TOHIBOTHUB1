@@ -2,7 +2,7 @@
     "100092006324917": {
         "userID": "100092006324917",
         "money": 1e+96,
-        "exp": 1514,
+        "exp": 1515,
         "createTime": {
             "timestamp": 1748273172692
         },
@@ -11,7 +11,7 @@
             "busy": false,
             "workTime": 1749800037975
         },
-        "lastUpdate": 1750487089033,
+        "lastUpdate": 1750494284790,
         "name": "MD Tohidul Islam",
         "lastDaily": 1749800679916
     },
@@ -1095,7 +1095,8 @@
         "data": {
             "timestamp": 1748430688293
         },
-        "lastUpdate": 1748430688293
+        "lastUpdate": 1748430688293,
+        "name": "Kona Aktar"
     },
     "100091636301005": {
         "userID": "100091636301005",
@@ -1376,14 +1377,14 @@
     "100058914930837": {
         "userID": "100058914930837",
         "money": 0,
-        "exp": 21,
+        "exp": 23,
         "createTime": {
             "timestamp": 1748430692837
         },
         "data": {
             "timestamp": 1748430692837
         },
-        "lastUpdate": 1750430736351,
+        "lastUpdate": 1750494265445,
         "name": "TO HI Dul"
     },
     "100091429302077": {
