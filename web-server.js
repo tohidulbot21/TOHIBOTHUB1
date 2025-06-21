@@ -6,15 +6,25 @@ const logger = require('./utils/log.js');
 class WebServer {
   constructor() {
     this.app = express();
-    this.host = 'localhost';
-    this.port = 10000;
+    // Render deployment fix - use 0.0.0.0 instead of localhost
+    this.port = process.env.PORT || 10000;
+    this.host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
     this.setupMiddleware();
     this.setupRoutes();
   }
 
   setupMiddleware() {
-    this.app.use(express.static('includes/cover'));
     this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+    this.app.use(express.static('public'));
+
+    // Add CORS for Render deployment
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+      next();
+    });
   }
 
   setupRoutes() {
@@ -63,16 +73,20 @@ class WebServer {
   }
 
   start() {
-    this.setupRoutes();
+    try {
+      // Use 0.0.0.0 for Render deployment
+      this.server = this.app.listen(this.port, '0.0.0.0', () => {
+        logger.log(`Web server running on 0.0.0.0:${this.port}`, "WEBSERVER");
+        logger.log(`Dashboard: http://0.0.0.0:${this.port}/dashboard`, "WEBSERVER");
 
-    this.server = this.app.listen(this.port, this.host, () => {
-      logger.log(`Web server running on ${this.host}:${this.port}`, "WEBSERVER");
-      logger.log(`Dashboard: http://${this.host}:${this.port}/dashboard`, "WEBSERVER");
-    });
-
-    this.server.on('error', (error) => {
+        // Additional Render-specific logging
+        if (process.env.RENDER) {
+          logger.log(`Render deployment detected - External URL: ${process.env.RENDER_EXTERNAL_URL}`, "WEBSERVER");
+        }
+      });
+    } catch (error) {
       logger.log(`Web server error: ${error.message}`, "WEBSERVER");
-    });
+    }
   }
 
   stop() {

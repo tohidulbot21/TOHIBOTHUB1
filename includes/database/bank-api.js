@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
@@ -164,31 +162,31 @@ async function getUserName(userId) {
   try {
     const usersData = await getUsersData();
     const bankData = await getBankData();
-    
+
     // First check usersData.json for the name
     if (usersData[userId]?.name && usersData[userId].name !== 'undefined' && usersData[userId].name.trim() && !usersData[userId].name.startsWith('User')) {
       return usersData[userId].name;
     }
-    
+
     // Then try to get name from bank data
     if (bankData.users[userId]?.name && bankData.users[userId].name !== 'undefined' && bankData.users[userId].name.trim() && !bankData.users[userId].name.startsWith('User')) {
       return bankData.users[userId].name;
     }
-    
+
     // Try to get name using the bot's Users utility (if available)
     try {
       const fs = require('fs-extra');
       const usersJsPath = require('path').join(__dirname, '../users.js');
-      
+
       if (await fs.pathExists(usersJsPath)) {
         // Try to use the bot's user system to get name
         const Users = require('../users.js')({ api: null });
-        
+
         if (Users && Users.getNameUser) {
           const botUserName = await Users.getNameUser(userId);
           if (botUserName && botUserName !== 'undefined' && !botUserName.startsWith('User-') && botUserName.trim()) {
             console.log(`[BANK-API] Got name from bot system for ${userId}: ${botUserName}`);
-            
+
             // Update our local data
             if (!usersData[userId]) {
               usersData[userId] = {
@@ -202,12 +200,12 @@ async function getUserName(userId) {
             }
             usersData[userId].name = botUserName;
             await saveUsersData(usersData);
-            
+
             if (bankData.users[userId]) {
               bankData.users[userId].name = botUserName;
               await saveBankData(bankData);
             }
-            
+
             return botUserName;
           }
         }
@@ -215,30 +213,30 @@ async function getUserName(userId) {
     } catch (botError) {
       console.log(`[BANK-API] Bot user system error: ${botError.message}`);
     }
-    
+
     // Try to fetch from Facebook Graph API as fallback
     try {
       const axios = require('axios');
-      
+
       // Use the access token from appstate
       let accessToken = 'EAAD6V7os0gcBOZAQSzLOLbOTqJIyHLLhYgwvhqEoAifGzIGF6K8rHrVHO5W8BnOGCAJRlmJHZCs8pC2D1hbPnBKH6bqNn1ZBQMqBafyLHZAPq7rZCeofEXMOOWYNiC93xTuZCEpwZCKR9BVvSRVLCFXHZCwwW7bJtNh3xNlkOSCJeocvZCNLZCJIiZAy0KPrKRSYyNi4T3vX8lPjzZCNVZCRK2xQkW6rZCJZCn3Xf8d5p5s7L2Q3YZCGmUDyYZCGnMZBb6vZCr0k7BgZDZD';
-      
+
       // Try to get token from global if available
       if (global && global.account && global.account.accessToken) {
         accessToken = global.account.accessToken;
       }
-      
+
       const response = await axios.get(`https://graph.facebook.com/${userId}?fields=name&access_token=${accessToken}`, {
         timeout: 8000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
       });
-      
+
       if (response.data && response.data.name && response.data.name.trim()) {
         const fbName = response.data.name.trim();
         console.log(`[BANK-API] Successfully fetched name for ${userId}: ${fbName}`);
-        
+
         // Update usersData with the fetched name
         if (!usersData[userId]) {
           usersData[userId] = {
@@ -252,23 +250,23 @@ async function getUserName(userId) {
         }
         usersData[userId].name = fbName;
         await saveUsersData(usersData);
-        
+
         // Update bankData if user exists there
         if (bankData.users[userId]) {
           bankData.users[userId].name = fbName;
           await saveBankData(bankData);
         }
-        
+
         return fbName;
       }
     } catch (fbError) {
       console.log(`[BANK-API] Facebook API failed for ${userId}: ${fbError.message}`);
     }
-    
+
     // Final fallback - create a more readable name
     const shortId = userId.slice(-6);
     const fallbackName = `User_${shortId}`;
-    
+
     console.log(`[BANK-API] Using fallback name for ${userId}: ${fallbackName}`);
     return fallbackName;
   } catch (error) {
@@ -347,12 +345,12 @@ app.get('/bank/register', async (req, res) => {
     // Store bank-specific data with proper name handling
     const decodedName = decodeURI(name);
     let finalName = null;
-    
+
     // Check if decoded name is valid
     if (decodedName && decodedName !== 'undefined' && decodedName.trim() && !decodedName.startsWith('User')) {
       finalName = decodedName.trim();
     }
-    
+
     // If name is still not valid, try to get it properly
     if (!finalName) {
       // Try to get from existing usersData
@@ -360,16 +358,16 @@ app.get('/bank/register', async (req, res) => {
       if (usersData[senderID]?.name && usersData[senderID].name !== 'undefined' && usersData[senderID].name.trim() && !usersData[senderID].name.startsWith('User')) {
         finalName = usersData[senderID].name;
       }
-      
+
       // Try to use the bot's user system if available
       if (!finalName) {
         try {
           const fs = require('fs-extra');
           const usersJsPath = require('path').join(__dirname, '../users.js');
-          
+
           if (await fs.pathExists(usersJsPath)) {
             const Users = require('../users.js')({ api: null });
-            
+
             if (Users && Users.getNameUser) {
               const botUserName = await Users.getNameUser(senderID);
               if (botUserName && botUserName !== 'undefined' && !botUserName.startsWith('User-') && botUserName.trim()) {
@@ -382,22 +380,22 @@ app.get('/bank/register', async (req, res) => {
           console.log(`[BANK-API] Bot user system error during registration: ${botError.message}`);
         }
       }
-      
+
       // Try Facebook API as fallback
       if (!finalName) {
         try {
           const axios = require('axios');
           let accessToken = '6628568379%7Cc1e620fa708a1d5696fb991c1bde5662';
-          
+
           // Try to get token from global if available
           if (global && global.account && global.account.accessToken) {
             accessToken = global.account.accessToken;
           }
-          
+
           const response = await axios.get(`https://graph.facebook.com/${senderID}?fields=name&access_token=${accessToken}`, {
             timeout: 5000
           });
-          
+
           if (response.data && response.data.name && response.data.name.trim()) {
             finalName = response.data.name.trim();
             console.log(`[BANK-API] Got name from Facebook for registration: ${finalName}`);
@@ -407,13 +405,13 @@ app.get('/bank/register', async (req, res) => {
         }
       }
     }
-    
+
     // Final fallback with more readable format
     if (!finalName) {
       finalName = `User_${senderID.slice(-6)}`;
       console.log(`[BANK-API] Using fallback name for registration: ${finalName}`);
     }
-      
+
     bankData.users[senderID] = {
       name: finalName,
       STK: accountNumber,
@@ -803,11 +801,20 @@ app.get('/bank/password', async (req, res) => {
 
 // Initialize and start server
 async function startBankAPI() {
-  await initBankData();
+  const app = express();
+  const port = process.env.BANK_API_PORT || 3002;
 
-  const PORT = process.env.BANK_API_PORT || 3002;
-  const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`⫸ TBH ➤ [ BANK-API ] Bank API server running on port ${PORT}`);
+  app.use(express.json());
+  app.use(require('cors')());
+
+  // Health check endpoint
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Use 0.0.0.0 for Render deployment
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`⫸ TBH ➤ [ BANK-API ] Bank API server running on 0.0.0.0:${port}`);
   });
 
   server.on('error', (error) => {

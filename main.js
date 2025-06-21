@@ -75,8 +75,11 @@ try {
   const webServer = new WebServer();
   const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
   if (isRender) {
+    // Render deployment configuration
     process.env.PORT = process.env.PORT || '10000';
+    process.env.NODE_ENV = 'production';
     logger.log(`Render detected - using PORT: ${process.env.PORT}`, "WEBSERVER");
+    logger.log(`Render URL: ${process.env.RENDER_EXTERNAL_URL}`, "WEBSERVER");
   }
   webServer.start();
   logger.log("Web server initialized successfully", "WEBSERVER");

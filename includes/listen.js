@@ -101,6 +101,13 @@ module.exports = function ({ api }) {
     botSettings
   };
 
+  // Render deployment health check
+  if (process.env.RENDER) {
+    setInterval(() => {
+      console.log(`🔄 Bot health check - ${new Date().toISOString()}`);
+    }, 300000); // Every 5 minutes
+  }
+
   // Load all handlers with error protection
   const handlers = {};
   try {
