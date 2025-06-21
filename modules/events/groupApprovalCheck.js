@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports.config = {
   name: "groupApprovalCheck",
-  eventType: ["message"],
+  eventType: [], // Disabled to prevent conflicts with handleCommand
   version: "1.0.0",
   credits: "TOHI-BOT-HUB",
   description: "Check if group is approved before allowing commands"

@@ -131,22 +131,22 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
       if (event.threadID && event.threadID !== event.senderID) {
         // Get current Thread ID (TID)
         const currentTID = event.threadID;
-        
+
         console.log(`🔍 Checking TID: ${currentTID} in groupsData.json`);
-        
+
         // Check if group exists in database
         const groupData = Groups.getData(currentTID);
-        
+
         if (!groupData) {
           // Group not found in database
           console.log(`❌ TID ${currentTID} NOT FOUND in groupsData.json`);
-          
+
           // Parse command to allow approve command for admins
           const messageBody = event.body || "";
           const prefix = global.config.PREFIX || "/";
           const commandName = messageBody.substring(prefix.length).split(' ')[0].toLowerCase();
           const isApproveCommand = commandName === "approve";
-          
+
           // Allow approve command for admins even in non-registered groups
           if (isApproveCommand && (isAdmin || isOwner)) {
             console.log(`✅ Allowing approve command for admin in unregistered group ${currentTID}`);
@@ -154,7 +154,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           } else {
             // Block all other commands
             logger.log(`🚫 Command ${commandName} blocked - Group ${currentTID} not in database`, "WARN");
-            
+
             api.sendMessage(
               `⚠️ এই গ্রুপ Bot Database এ নেই!\n\n` +
               `🆔 Thread ID: ${currentTID}\n` +
@@ -164,7 +164,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
               `💡 Admin কে বলুন: "/approve ${currentTID}" দিতে`,
               currentTID
             );
-            
+
             return; // Stop execution
           }
         } else {
@@ -172,45 +172,45 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           const isApproved = groupData.status === 'approved';
           const isPending = groupData.status === 'pending';
           const isRejected = groupData.status === 'rejected';
-          
+
           console.log(`📊 TID ${currentTID} found | Status: ${groupData.status} | Approved: ${isApproved}`);
-          
+
           // Parse command for special handling
           const messageBody = event.body || "";
           const prefix = global.config.PREFIX || "/";
           const commandName = messageBody.substring(prefix.length).split(' ')[0].toLowerCase();
           const isApproveCommand = commandName === "approve";
-          
-          if (isRejected) {
-            // Group is rejected - block all commands except admin approve
-            if (!isApproveCommand || (!isAdmin && !isOwner)) {
-              logger.log(`🚫 Group ${currentTID} is REJECTED - blocking command ${commandName}`, "WARN");
-              return; // Silent block for rejected groups
+
+          // Admin bypass - allow all commands for admins/owners
+          if (isAdmin || isOwner) {
+            console.log(`✅ Admin/Owner ${event.senderID} - allowing command ${commandName} in TID ${currentTID}`);
+            // Continue to command execution
+          } else if (isRejected) {
+            // Group is rejected - block all commands for non-admins
+            logger.log(`🚫 Group ${currentTID} is REJECTED - blocking command ${commandName}`, "WARN");
+            return; // Silent block for rejected groups
+          } else if (!isApproved || isPending) {
+            // Group is pending or not approved - block for non-admins
+            logger.log(`⏳ Group ${currentTID} NOT APPROVED (${groupData.status}) - blocking command ${commandName}`, "WARN");
+
+            // Send notification
+            if (!global.notifiedGroups) global.notifiedGroups = new Set();
+
+            if (!global.notifiedGroups.has(currentTID)) {
+              api.sendMessage(
+                `⚠️ এই গ্রুপটি এখনো approve করা হয়নি!\n\n` +
+                `🆔 Thread ID: ${currentTID}\n` +
+                `📊 Status: ${groupData.status.toUpperCase()}\n` +
+                `⏰ Added: ${new Date(groupData.createdAt).toLocaleString('bn-BD')}\n\n` +
+                `🚫 Bot commands কাজ করবে না যতক্ষণ না approve হয়।\n` +
+                `👑 Bot Admin: ${global.config.ADMINBOT?.[0] || 'Unknown'}\n\n` +
+                `💡 Admin থেকে approval নিন`,
+                currentTID
+              );
+              global.notifiedGroups.add(currentTID);
             }
-          } else if (!isApproved) {
-            // Group is pending or not approved
-            if (!isApproveCommand || (!isAdmin && !isOwner)) {
-              logger.log(`⏳ Group ${currentTID} NOT APPROVED (${groupData.status}) - blocking command ${commandName}`, "WARN");
-              
-              // Send notification
-              if (!global.notifiedGroups) global.notifiedGroups = new Set();
-              
-              if (!global.notifiedGroups.has(currentTID)) {
-                api.sendMessage(
-                  `⚠️ এই গ্রুপটি এখনো approve করা হয়নি!\n\n` +
-                  `🆔 Thread ID: ${currentTID}\n` +
-                  `📊 Status: ${groupData.status.toUpperCase()}\n` +
-                  `⏰ Added: ${new Date(groupData.createdAt).toLocaleString('bn-BD')}\n\n` +
-                  `🚫 Bot commands কাজ করবে না যতক্ষণ না approve হয়।\n` +
-                  `👑 Bot Admin: ${global.config.ADMINBOT?.[0] || 'Unknown'}\n\n` +
-                  `💡 Admin থেকে approval নিন`,
-                  currentTID
-                );
-                global.notifiedGroups.add(currentTID);
-              }
-              
-              return; // Stop execution
-            }
+
+            return; // Stop execution
           } else {
             // Group is approved - allow all commands
             console.log(`✅ TID ${currentTID} is APPROVED - allowing command ${commandName}`);

@@ -175,17 +175,17 @@ module.exports = function ({ api }) {
       // Skip ready events
       if (event.type === 'ready') return;
       
-      // Check approval for groups (admins bypass)
-      if (event.threadID && event.threadID !== event.senderID) {
-        const isAdmin = global.config.ADMINBOT?.includes(event.senderID);
+      // Admin bypass for all checks
+      const isAdmin = global.config.ADMINBOT?.includes(event.senderID);
+      
+      // Skip approval check for admin commands
+      if (!isAdmin && event.threadID && event.threadID !== event.senderID) {
+        const Groups = require("./database/groups")({ api });
         
-        if (!isAdmin) {
-          const Groups = require("./database/groups")({ api });
-          
-          if (!Groups.isApproved(event.threadID)) {
-            // Silently block unapproved groups
-            return;
-          }
+        if (!Groups.isApproved(event.threadID)) {
+          // Only block if not approved and not admin
+          logger.log(`Group ${event.threadID} not approved - blocking for non-admin`, "DEBUG");
+          return;
         }
       }
       
