@@ -26,6 +26,15 @@
         "autoApprove": false
       },
       "lastUpdated": "2025-06-20T12:48:03.576Z"
+    },
+    "auto-migrate": {
+      "status": "approved",
+      "approvedAt": "2025-06-21T10:51:33.414Z",
+      "settings": {
+        "allowCommands": true,
+        "autoApprove": false
+      },
+      "lastUpdated": "2025-06-21T10:51:33.414Z"
     }
   },
   "settings": {
