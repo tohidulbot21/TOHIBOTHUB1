@@ -81,7 +81,31 @@ module.exports.run = async function ({ api, event, args }) {
         const dipto = args.join(" ").toLowerCase();
         const uid = event.senderID;
 
-        // Admin commands for managing teachers
+        // Admin commands for managing teachers - Fixed format
+        if (args[0] === 'teacher' && args[1]) {
+            if (uid !== "100092006324917") {
+                return api.sendMessage('🚫 শুধুমাত্র আমার মালিক এই command ব্যবহার করতে পারে!', event.threadID, event.messageID);
+            }
+            
+            const newTeacherID = args[1];
+            if (!newTeacherID) {
+                return api.sendMessage('❌ Teacher এর UID দিন!\nFormat: teach teacher [uid]', event.threadID, event.messageID);
+            }
+            
+            // Check if already a teacher
+            if (authorizedTeachers[newTeacherID]) {
+                const teacherName = await getUserName(newTeacherID, api);
+                return api.sendMessage(`⚠️ ${teacherName} (${newTeacherID}) ইতিমধ্যে Teacher আছে!`, event.threadID, event.messageID);
+            }
+            
+            authorizedTeachers[newTeacherID] = true;
+            saveTeachers();
+            
+            const teacherName = await getUserName(newTeacherID, api);
+            return api.sendMessage(`✅ ${teacherName} (${newTeacherID}) কে Teacher হিসেবে add করা হয়েছে! 👨‍🏫\n\n📊 Current Teachers: ${Object.keys(authorizedTeachers).length}`, event.threadID, event.messageID);
+        }
+
+        // Legacy support for 'add teacher' format
         if (args[0] === 'add' && args[1] === 'teacher') {
             if (uid !== "100092006324917") {
                 return api.sendMessage('🚫 শুধুমাত্র আমার মালিক এই command ব্যবহার করতে পারে!', event.threadID, event.messageID);
@@ -89,14 +113,14 @@ module.exports.run = async function ({ api, event, args }) {
             
             const newTeacherID = args[2];
             if (!newTeacherID) {
-                return api.sendMessage('❌ Teacher এর UID দিন!\nFormat: add teacher [uid]', event.threadID, event.messageID);
+                return api.sendMessage('❌ Teacher এর UID দিন!\nFormat: teach add teacher [uid] অথবা teach teacher [uid]', event.threadID, event.messageID);
             }
             
             authorizedTeachers[newTeacherID] = true;
             saveTeachers();
             
             const teacherName = await getUserName(newTeacherID, api);
-            return api.sendMessage(`✅ ${teacherName} কে Teacher হিসেবে add করা হয়েছে! 👨‍🏫`, event.threadID, event.messageID);
+            return api.sendMessage(`✅ ${teacherName} (${newTeacherID}) কে Teacher হিসেবে add করা হয়েছে! 👨‍🏫`, event.threadID, event.messageID);
         }
 
         if (args[0] === 'remove' && args[1] === 'teacher') {
@@ -142,12 +166,38 @@ module.exports.run = async function ({ api, event, args }) {
             // Add admin commands if user is owner
             if (uid === "100092006324917") {
                 helpMsg += `👑 **Admin Commands:**\n` +
-                          `• add teacher [uid] - Add new teacher\n` +
-                          `• remove teacher [uid] - Remove teacher\n\n`;
+                          `• teach teacher [uid] - Add new teacher\n` +
+                          `• teach add teacher [uid] - Add new teacher (legacy)\n` +
+                          `• teach remove teacher [uid] - Remove teacher\n` +
+                          `• teach teachers - View all teachers\n\n`;
             }
             
             helpMsg += `🎯 **Your Total Teachings:** ${teachCounts[uid] || 0}`;
             return api.sendMessage(helpMsg, event.threadID, event.messageID);
+        }
+
+        // Show all teachers (admin only)
+        if (args[0] === 'teachers') {
+            if (uid !== "100092006324917") {
+                return api.sendMessage('🚫 শুধুমাত্র আমার মালিক এই command ব্যবহার করতে পারে!', event.threadID, event.messageID);
+            }
+            
+            const teacherIds = Object.keys(authorizedTeachers);
+            if (teacherIds.length === 0) {
+                return api.sendMessage('📋 কোন Teacher নেই!', event.threadID, event.messageID);
+            }
+            
+            let teachersList = `👑 **Authorized Teachers List** 👑\n\n`;
+            
+            for (let i = 0; i < teacherIds.length; i++) {
+                const teacherId = teacherIds[i];
+                const teacherName = await getUserName(teacherId, api);
+                const isOwner = teacherId === "100092006324917" ? " 👑 (Owner)" : "";
+                teachersList += `${i + 1}. ${teacherName}${isOwner}\n📱 UID: ${teacherId}\n\n`;
+            }
+            
+            teachersList += `📊 **Total Teachers:** ${teacherIds.length}`;
+            return api.sendMessage(teachersList, event.threadID, event.messageID);
         }
 
         // Show user stats
