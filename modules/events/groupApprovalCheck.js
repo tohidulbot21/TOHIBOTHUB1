@@ -21,61 +21,103 @@ module.exports.run = async function({ api, event, Groups }) {
     // Check if message starts with prefix (is a command)
     if (!event.body || !event.body.startsWith(prefix)) return;
 
-    // Check group approval status with enhanced auto-migration
-    let isApproved, isPending, isRejected;
+    // ========== STRICT GROUP APPROVAL CHECK ==========
+    console.log(`🔍 Checking group approval for TID: ${threadID}`);
     
-    try {
-      // This will auto-migrate legacy approved groups
-      isApproved = Groups.isApproved(threadID);
-      isPending = Groups.isPending(threadID);
-      isRejected = Groups.isRejected(threadID);
+    // Step 1: Check if group data exists in groupsData.json
+    const groupData = Groups.getData(threadID);
+    
+    if (!groupData) {
+      // Group data doesn't exist - create and mark as pending
+      console.log(`❌ Group ${threadID} not found in database. Adding to pending...`);
       
-      // If auto-migrated, skip further checks
-      if (isApproved) {
-        return true;
-      }
-    } catch (error) {
-      console.log(`Groups system error for ${threadID}:`, error.message);
-      // Enhanced fallback to legacy config check
       try {
-        const configPath = require('path').join(__dirname, "../../config.json");
-        delete require.cache[require.resolve(configPath)];
-        const config = require(configPath);
-        
-        // Check if it's a legacy approved group
-        const isLegacyApproved = config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
-                                config.APPROVAL?.approvedGroups?.includes(threadID) ||
-                                config.approvedGroups?.includes(String(threadID)) ||
-                                config.approvedGroups?.includes(threadID);
-        
-        if (isLegacyApproved) {
-          // Force create approved status for legacy groups
+        // Create group data automatically
+        const newGroupData = await Groups.createData(threadID);
+        Groups.addToPending(threadID);
+
+        // Send notification to group
+        api.sendMessage(
+          `⚠️ এই গ্রুপটি Bot database এ নেই!\n\n` +
+          `🆔 Group ID: ${threadID}\n` +
+          `📊 Status: ডেটাবেসে যোগ করা হয়েছে - Pending Approval\n\n` +
+          `🚫 Bot commands কাজ করবে না যতক্ষণ না Admin approve করে।\n` +
+          `👑 Bot Admin: ${global.config.ADMINBOT?.[0] || 'Unknown'}\n\n` +
+          `💡 Admin কে বলুন: /approve ${threadID}`,
+          threadID
+        );
+
+        // Notify admin about new group
+        if (global.config.ADMINBOT && global.config.ADMINBOT[0]) {
           try {
-            Groups.setData(threadID, {
-              threadID: threadID,
-              threadName: "Legacy Group (Force Migrated)",
-              status: "approved",
-              memberCount: 0,
-              createdAt: new Date().toISOString(),
-              settings: { allowCommands: true, autoApprove: false }
-            });
-            console.log(`🔄 Force migrated legacy group: ${threadID}`);
-            return true;
-          } catch (migrateError) {
-            console.log(`Migration failed for ${threadID}:`, migrateError.message);
+            const groupInfo = await api.getThreadInfo(threadID);
+            api.sendMessage(
+              `🔔 নতুন গ্রুপ Database এ যোগ হয়েছে:\n\n` +
+              `📝 Group: ${groupInfo.threadName || 'Unknown'}\n` +
+              `🆔 TID: ${threadID}\n` +
+              `👥 Members: ${groupInfo.participantIDs?.length || 0}\n\n` +
+              `✅ Approve: /approve ${threadID}\n` +
+              `❌ Reject: /approve reject ${threadID}`,
+              global.config.ADMINBOT[0]
+            );
+          } catch (notifyError) {
+            console.log(`Admin notification failed: ${notifyError.message}`);
           }
         }
-        
-        isApproved = false;
-        isPending = !isLegacyApproved;
-        isRejected = false;
-      } catch (configError) {
-        // If everything fails, consider as pending for new groups
-        isApproved = false;
-        isPending = true;
-        isRejected = false;
+
+      } catch (createError) {
+        console.error('Error creating group data:', createError.message);
       }
+
+      // Block command execution
+      event.preventDefault = true;
+      return false;
     }
+
+    // Step 2: Check approval status from database
+    const isApproved = groupData.status === 'approved';
+    const isPending = groupData.status === 'pending';
+    const isRejected = groupData.status === 'rejected';
+
+    console.log(`📊 Group ${threadID} status: ${groupData.status} | Approved: ${isApproved}`);
+
+    // Step 3: Handle based on status
+    if (isRejected) {
+      // Group is rejected - silent block
+      console.log(`🚫 Group ${threadID} is REJECTED - blocking commands`);
+      event.preventDefault = true;
+      return false;
+    }
+
+    if (!isApproved || isPending) {
+      // Group is not approved yet
+      console.log(`⏳ Group ${threadID} is NOT APPROVED - blocking commands`);
+      
+      // Send notification (only once per session to avoid spam)
+      if (!global.notifiedGroups) global.notifiedGroups = new Set();
+      
+      if (!global.notifiedGroups.has(threadID)) {
+        api.sendMessage(
+          `⚠️ এই গ্রুপটি এখনো approve করা হয়নি!\n\n` +
+          `🆔 Group ID: ${threadID}\n` +
+          `📊 Status: ${groupData.status.toUpperCase()}\n` +
+          `⏰ Created: ${new Date(groupData.createdAt).toLocaleString('bn-BD')}\n\n` +
+          `🚫 Bot commands কাজ করবে না যতক্ষণ না approve হয়।\n` +
+          `👑 Bot Admin: ${global.config.ADMINBOT?.[0] || 'Unknown'}\n\n` +
+          `💡 Admin থেকে approve করানোর জন্য অনুরোধ করুন`,
+          threadID
+        );
+        global.notifiedGroups.add(threadID);
+      }
+
+      // Block command execution
+      event.preventDefault = true;
+      return false;
+    }
+
+    // Step 4: Group is approved - allow commands
+    console.log(`✅ Group ${threadID} is APPROVED - allowing commands`);
+    return true;
 
     if (isRejected) {
       // Group is rejected - bot should leave or stay silent

@@ -27,11 +27,11 @@ module.exports.run = async function ({ api, event, args }) {
     switch (command) {
       case "migrate": {
         api.sendMessage("🔄 পুরানো approved groups migrate করা হচ্ছে...", threadID, messageID);
-        
+
         // Force migration
         Groups.updateSettings({ migrated: false });
         const migrated = Groups.migrateFromConfig();
-        
+
         if (migrated) {
           const approvedGroups = Groups.getApprovedGroups();
           api.sendMessage(
@@ -102,7 +102,7 @@ module.exports.run = async function ({ api, event, args }) {
         }
 
         if (pendingGroups.length > 10) {
-          msg += `... এবং আরো ${pendingGroups.length - 10}টি গ্রুপ`;
+          msg += `... এবং আরও ${pendingGroups.length - 10}টি গ্রুপ`;
         }
 
         return api.sendMessage(msg, threadID, messageID);
@@ -139,18 +139,63 @@ module.exports.run = async function ({ api, event, args }) {
       }
 
       default: {
-        // Approve current group or specified group
-        const targetID = args[0] || threadID;
+        // Auto-detect if it's current group or provided ID
+        let targetID = threadID;
 
-        if (Groups.isApproved(targetID)) {
-          return api.sendMessage("✅ এই গ্রুপ ইতিমধ্যে approved!", threadID, messageID);
+        // If args provided, use that as target ID
+        if (args[0] && args[0] !== threadID) {
+          targetID = args[0];
+        }
+
+        console.log(`🔧 Admin approving TID: ${targetID}`);
+
+        // Check if group data exists
+        let groupData = Groups.getData(targetID);
+
+        if (!groupData) {
+          // Group doesn't exist in database - create it first
+          console.log(`📝 Creating new group data for TID: ${targetID}`);
+
+          try {
+            groupData = await Groups.createData(targetID);
+            if (!groupData) {
+              return api.sendMessage(
+                `❌ TID: ${targetID} এর জন্য Group data create করতে পারিনি!\n\n` +
+                `🔧 সমস্যা হতে পারে:\n` +
+                `• TID টি সঠিক নয়\n` +
+                `• Bot এই গ্রুপে নেই\n` +
+                `• API error\n\n` +
+                `💡 TID টি check করে আবার try করুন`,
+                threadID, messageID
+              );
+            }
+          } catch (createError) {
+            return api.sendMessage(
+              `❌ Group data create করতে error হয়েছে!\n\n` +
+              `Error: ${createError.message}\n\n` +
+              `💡 TID টি check করে আবার try করুন`,
+              threadID, messageID
+            );
+          }
+        }
+
+        // Check if already approved
+        if (groupData.status === 'approved') {
+          return api.sendMessage(
+            `✅ এই গ্রুপ ইতিমধ্যে approved!\n\n` +
+            `🆔 TID: ${targetID}\n` +
+            `📝 Group: ${groupData.threadName}\n` +
+            `⏰ Approved: ${new Date(groupData.approvedAt).toLocaleString('bn-BD')}`,
+            threadID, messageID
+          );
         }
 
         // Approve the group
         const success = Groups.approveGroup(targetID);
 
         if (success) {
-          const groupData = Groups.getData(targetID);
+          // Get updated data
+          groupData = Groups.getData(targetID);
           const groupName = groupData ? groupData.threadName : "Unknown Group";
 
           // Force cache refresh for instant activation
@@ -162,23 +207,23 @@ module.exports.run = async function ({ api, event, args }) {
             });
           }
 
-          api.sendMessage(`✅ Group "${groupName}" approved successfully!\n\n🚀 Bot commands এখনই active হয়ে গেছে!`, threadID, messageID);
-
-          // Send welcome message to approved group
-          if (targetID !== threadID) {
-            try {
-              api.sendMessage(
-                `🎉 অভিনন্দন! আপনার গ্রুপটি approve করা হয়েছে!\n\n` +
-                `✅ Bot commands এখন active।\n` +
-                `📝 Type ${global.config.PREFIX || '/'}help to see available commands.\n` +
-                `👑 Bot Admin: ${OWNER_ID}`,
-                targetID
-              );
-            } catch (error) {
-              logger.log(`Could not send welcome message: ${error.message}`, 'WARN');
-            }
+          // Clear notification cache to allow immediate commands
+          if (global.notifiedGroups) {
+            global.notifiedGroups.delete(targetID);
           }
 
+          console.log(`✅ Successfully approved TID: ${targetID}`);
+
+          api.sendMessage(
+            `✅ Group approved successfully!\n\n` +
+            `📝 Group Name: ${groupName}\n` +
+            `🆔 Thread ID: ${targetID}\n` +
+            `👥 Members: ${groupData.memberCount || 0}\n` +
+            `⏰ Approved: ${new Date().toLocaleString('bn-BD')}\n\n` +
+            `🚀 Bot commands এখনই active হয়ে গেছে!\n` +
+            `💡 Test করতে যেকোনো command try করুন`,
+            threadID, messageID
+          );
         } else {
           api.sendMessage("❌ Group approve করতে সমস্যা হয়েছে!", threadID, messageID);
         }
