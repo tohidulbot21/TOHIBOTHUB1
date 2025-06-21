@@ -23,14 +23,14 @@ module.exports.run = async function({ api, event, Groups }) {
 
     // ========== STRICT GROUP APPROVAL CHECK ==========
     console.log(`🔍 Checking group approval for TID: ${threadID}`);
-    
+
     // Step 1: Check if group data exists in groupsData.json
     const groupData = Groups.getData(threadID);
-    
+
     if (!groupData) {
       // Group data doesn't exist - create and mark as pending
       console.log(`❌ Group ${threadID} not found in database. Adding to pending...`);
-      
+
       try {
         // Create group data automatically
         const newGroupData = await Groups.createData(threadID);
@@ -92,10 +92,10 @@ module.exports.run = async function({ api, event, Groups }) {
     if (!isApproved || isPending) {
       // Group is not approved yet
       console.log(`⏳ Group ${threadID} is NOT APPROVED - blocking commands`);
-      
+
       // Send notification (only once per session to avoid spam)
       if (!global.notifiedGroups) global.notifiedGroups = new Set();
-      
+
       if (!global.notifiedGroups.has(threadID)) {
         api.sendMessage(
           `⚠️ এই গ্রুপটি এখনো approve করা হয়নি!\n\n` +
@@ -116,7 +116,9 @@ module.exports.run = async function({ api, event, Groups }) {
     }
 
     // Step 4: Group is approved - allow commands
-    console.log(`✅ Group ${threadID} is APPROVED - allowing commands`);
+    if (global.config.DeveloperMode) {
+      console.log(`✅ Group ${threadID} is APPROVED - allowing commands`);
+    }
     return true;
 
     if (isRejected) {

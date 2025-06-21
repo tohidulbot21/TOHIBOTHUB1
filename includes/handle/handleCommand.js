@@ -411,13 +411,25 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
       try {
         await executeCommand(command, Obj, commandName);
       } catch (error) {
-        if (shouldIgnoreError(error)) {
-          // Log timeout/ignorable errors as DEBUG only
-          logger.log(`Command "${commandName}" issue: ${error.message}`, "DEBUG");
-        } else {
-          // Log other errors normally
-          logger.log(`Command "${commandName}" error: ${error.message}`, "ERROR");
+        logger.log(`Command execution error: ${error.message}`, "DEBUG");
+
+        // Handle specific errors
+        if (error.message.includes('rate limit')) {
+          return api.sendMessage("⚠️ Rate limit exceeded. Please wait before using commands.", threadID);
         }
+
+        if (error.message.includes('permission')) {
+          return api.sendMessage("❌ You don't have permission to use this command.", threadID);
+        }
+
+        // Handle mention errors silently
+        if (error.message.includes('Mention') || error.message.includes('not found in message string')) {
+          logger.log(`Mention handling warning: ${error.message}`, "DEBUG");
+          return; // Don't send error message for mention issues
+        }
+
+        // Generic error message
+        return api.sendMessage(`❌ Command execution failed: ${error.message}`, threadID, messageID);
       }
 
     } catch (error) {

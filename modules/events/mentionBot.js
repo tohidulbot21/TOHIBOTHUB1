@@ -15,9 +15,22 @@ module.exports.run = async function({ api, event, Threads, Users }) {
     const botID = api.getCurrentUserID();
     
     if (mentions && mentions[botID]) {
-      // Get user info
-      const userInfo = await api.getUserInfo(senderID);
-      const userName = userInfo[senderID].name;
+      // Get user info with better error handling
+      let userName = "User";
+      try {
+        const userInfo = await api.getUserInfo(senderID);
+        if (userInfo && userInfo[senderID] && userInfo[senderID].name) {
+          userName = userInfo[senderID].name;
+        } else {
+          // Try to get from Users database as fallback
+          const userData = await Users.getData(senderID);
+          if (userData && userData.name) {
+            userName = userData.name;
+          }
+        }
+      } catch (error) {
+        console.log(`[MENTION-BOT] Error getting user info for ${senderID}: ${error.message}`);
+      }
       
       // Random responses when bot is mentioned
       const responses = [
@@ -41,16 +54,23 @@ module.exports.run = async function({ api, event, Threads, Users }) {
       // Select random response
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
       
-      // Send response with mention
-      await api.sendMessage({
-        body: randomResponse,
-        mentions: [{
-          tag: userName,
-          id: senderID
-        }]
-      }, threadID, messageID);
-      
-      console.log(`[MENTION-BOT] Bot mentioned by ${userName} (${senderID}) in thread ${threadID}`);
+      // Send response with mention - handle mention more carefully
+      try {
+        await api.sendMessage({
+          body: randomResponse,
+          mentions: [{
+            tag: userName,
+            id: senderID,
+            fromIndex: randomResponse.indexOf(userName)
+          }]
+        }, threadID, messageID);
+        
+        console.log(`[MENTION-BOT] Bot mentioned by ${userName} (${senderID}) in thread ${threadID}`);
+      } catch (mentionError) {
+        // If mention fails, send without mention
+        await api.sendMessage(randomResponse, threadID, messageID);
+        console.log(`[MENTION-BOT] Sent response without mention due to error: ${mentionError.message}`);
+      }
     }
     
   } catch (error) {
