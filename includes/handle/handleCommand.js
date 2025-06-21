@@ -197,7 +197,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
             const now = Date.now();
 
             if (now - lastLogged > 3600000) { // 1 hour = 3600000ms
-              logger.log(`⏳ Group ${currentTID} NOT APPROVED (${groupData.status}) - blocking commands`, "WARN");
+              // Silent - no logging for unapproved groups
               global.lastLoggedGroups.set(currentTID, now);
             }
 
@@ -388,7 +388,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       const userName = global.data.userName.get(senderID) || "Unknown User";
 
-      // Enhanced stylish command usage logging
+      // Simple command usage logging - only essential info
       try {
         let groupName = "Private Chat";
         if (event.threadID && event.threadID !== event.senderID) {
@@ -400,32 +400,11 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           }
         }
 
-        // Create stylish console output
-        const chalk = require("chalk");
-        const gradient = require("gradient-string");
-
-        console.log(chalk.cyan("╭─────────────────────────────────────╮"));
-        console.log(chalk.cyan("│") + gradient.rainbow("        🚀 COMMAND EXECUTED 🚀       ") + chalk.cyan("│"));
-        console.log(chalk.cyan("╰─────────────────────────────────────╯"));
-        console.log(chalk.yellow("📋 Group Name: ") + chalk.green(groupName));
-        console.log(chalk.yellow("👤 User: ") + chalk.blue(userName));
-        console.log(chalk.yellow("🆔 UID: ") + chalk.magenta(senderID));
-        console.log(chalk.yellow("⚡ Command: ") + chalk.red(`/${commandName}`));
-        console.log(chalk.yellow("📊 Status: ") + chalk.green("✅ SUCCESS"));
-        console.log(chalk.yellow("⏰ Time: ") + chalk.cyan(new Date().toLocaleString("en-US", {
-          timeZone: "Asia/Dhaka",
-          hour12: true,
-          year: 'numeric',
-          month: 'short',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        })));
-        console.log(chalk.cyan("─".repeat(40)));
+        // Simple one-line command log
+        console.log(`⚡ ${userName} used /${commandName} in ${groupName}`);
       } catch (logError) {
-        // Fallback to simple logging if stylish logging fails
-        logger.log(`Command "${commandName}" used by ${userName} (${senderID})`, "COMMAND");
+        // Simple fallback
+        console.log(`⚡ Command: /${commandName}`);
       }
 
       // Execute command with enhanced error handling
