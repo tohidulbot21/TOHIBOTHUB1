@@ -32,10 +32,9 @@ console.log(chalk.bold.cyan(`
 
 console.log(chalk.blue.bold(`
 ╔══════════════════════════════════════╗
-║          TOHI-BOT-HUB v2.0.0         ║
-║      Enhanced Facebook Bot System    ║
+║         TOHI-BOT-HUB v2.0.0          ║
+║         Facebook Bot System          ║
 ║     Created by TOHI-BOT-HUB Team     ║
-║         Optimized & Rebuilt          ║
 ╚══════════════════════════════════════╝
 `));
 
