@@ -153,7 +153,16 @@ module.exports.run = async function ({ api, event, args }) {
           const groupData = Groups.getData(targetID);
           const groupName = groupData ? groupData.threadName : "Unknown Group";
 
-          api.sendMessage(`✅ Group "${groupName}" approved successfully!`, threadID, messageID);
+          // Force cache refresh for instant activation
+          if (global.data && global.data.threadData) {
+            global.data.threadData.set(targetID, {
+              ...(global.data.threadData.get(targetID) || {}),
+              approved: true,
+              approvedAt: new Date().toISOString()
+            });
+          }
+
+          api.sendMessage(`✅ Group "${groupName}" approved successfully!\n\n🚀 Bot commands এখনই active হয়ে গেছে!`, threadID, messageID);
 
           // Send welcome message to approved group
           if (targetID !== threadID) {

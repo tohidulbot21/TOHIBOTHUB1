@@ -21,10 +21,34 @@ module.exports.run = async function({ api, event, Groups }) {
     // Check if message starts with prefix (is a command)
     if (!event.body || !event.body.startsWith(prefix)) return;
 
-    // Check group approval status
-    const isApproved = Groups.isApproved(threadID);
-    const isPending = Groups.isPending(threadID);
-    const isRejected = Groups.isRejected(threadID);
+    // Check group approval status with legacy support
+    let isApproved, isPending, isRejected;
+    
+    try {
+      isApproved = Groups.isApproved(threadID);
+      isPending = Groups.isPending(threadID);
+      isRejected = Groups.isRejected(threadID);
+    } catch (error) {
+      console.log(`Groups system error for ${threadID}:`, error.message);
+      // Fallback to legacy config check
+      try {
+        const configPath = require('path').join(__dirname, "../../config.json");
+        delete require.cache[require.resolve(configPath)];
+        const config = require(configPath);
+        
+        isApproved = config.APPROVAL?.approvedGroups?.includes(String(threadID)) || 
+                     config.APPROVAL?.approvedGroups?.includes(threadID) ||
+                     config.approvedGroups?.includes(String(threadID)) ||
+                     config.approvedGroups?.includes(threadID) || false;
+        isPending = false;
+        isRejected = false;
+      } catch (configError) {
+        // If everything fails, consider as pending
+        isApproved = false;
+        isPending = true;
+        isRejected = false;
+      }
+    }
 
     if (isRejected) {
       // Group is rejected - bot should leave or stay silent

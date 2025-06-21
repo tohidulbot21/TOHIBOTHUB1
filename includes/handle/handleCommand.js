@@ -129,8 +129,8 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
 
       // For group chats, check if group is approved (strict approval system)
       if (event.threadID && event.threadID !== event.senderID) {
-        // Get group approval status - but allow commands by default if Groups is not working
-        let isApproved = true;
+        // Get group approval status with enhanced legacy support
+        let isApproved = false;
         let isPending = false;
         let isRejected = false;
 
@@ -139,9 +139,27 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
           isPending = Groups.isPending(event.threadID);
           isRejected = Groups.isRejected(event.threadID);
         } catch (error) {
-          // If Groups system fails, allow commands to work
-          logger.log(`Groups system error, allowing commands: ${error.message}`, "DEBUG");
-          isApproved = true;
+          logger.log(`Groups system error, checking legacy: ${error.message}`, "DEBUG");
+          
+          // Enhanced fallback check for legacy approved groups
+          try {
+            const configPath = require('path').join(__dirname, "../../config.json");
+            delete require.cache[require.resolve(configPath)];
+            const config = require(configPath);
+            
+            // Check multiple possible locations for approved groups
+            isApproved = config.APPROVAL?.approvedGroups?.includes(String(event.threadID)) || 
+                         config.APPROVAL?.approvedGroups?.includes(event.threadID) ||
+                         config.approvedGroups?.includes(String(event.threadID)) ||
+                         config.approvedGroups?.includes(event.threadID) || false;
+            
+            if (isApproved) {
+              logger.log(`Legacy approved group found: ${event.threadID}`, "SUCCESS");
+            }
+          } catch (configError) {
+            logger.log(`Config check failed: ${configError.message}`, "DEBUG");
+            isApproved = false;
+          }
         }
 
         // Parse command early

@@ -212,6 +212,17 @@ function startProject() {
       logger.log("Binary cleanup system initialization failed", "WARNING");
     }
 
+    // Force migration check for legacy approved groups
+    try {
+      const Groups = require('./includes/database/groups')({ api: null });
+      const migrated = Groups.migrateFromConfig();
+      if (migrated) {
+        logger.log("Legacy approved groups migrated successfully", "MIGRATION");
+      }
+    } catch (e) {
+      logger.log("Legacy migration check failed", "WARNING");
+    }
+
     const child = spawn("node", [
       "--trace-warnings", 
       "--async-stack-traces", 

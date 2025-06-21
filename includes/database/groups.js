@@ -424,7 +424,14 @@ module.exports = function({ api }) {
   };
 
   // Auto migrate on first initialization only
-  Groups.migrateFromConfig();
+  try {
+    const migrated = Groups.migrateFromConfig();
+    if (migrated) {
+      console.log("✅ Legacy groups migration completed successfully");
+    }
+  } catch (error) {
+    console.log("⚠️ Migration skipped:", error.message);
+  }
 
   return Groups;
 };
