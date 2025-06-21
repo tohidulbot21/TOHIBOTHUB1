@@ -35,7 +35,26 @@ module.exports = {
     }
 
     try {
-      const processingMsg = await api.sendMessage("𝐏𝐥𝐞𝐚𝐬𝐞 𝐖𝐚𝐢𝐭 𝐁𝐚𝐛𝐲...😘", threadID);
+      // Step 1: Start loading (25%)
+      const processingMsg = await api.sendMessage("🔄 4K Enhancement শুরু হচ্ছে...\n\n[▓▓░░░░░░░░░░] 25%", threadID);
+
+      // Step 2: Processing image (50%)
+      setTimeout(() => {
+        api.editMessage("🔄 Image Processing চলছে...\n\n[▓▓▓▓▓▓░░░░░░] 50%", processingMsg.messageID, threadID);
+      }, 1000);
+
+      // Step 3: Enhancing quality (75%)
+      setTimeout(() => {
+        api.editMessage("✨ Quality Enhancement করা হচ্ছে...\n\n[▓▓▓▓▓▓▓▓▓░░░] 75%", processingMsg.messageID, threadID);
+      }, 2000);
+
+      // Step 4: Almost done (100%)
+      setTimeout(() => {
+        api.editMessage("🎯 Final Processing...\n\n[▓▓▓▓▓▓▓▓▓▓▓▓] 100%", processingMsg.messageID, threadID);
+      }, 3000);
+
+      // Wait for UI updates before API call
+      await new Promise(resolve => setTimeout(resolve, 3500));
 
       const apiUrl = `https://aryan-xyz-upscale-api-phi.vercel.app/api/upscale-image?imageUrl=${encodeURIComponent(imageUrl)}&apikey=${xyz}`;
 
@@ -50,15 +69,32 @@ module.exports = {
 
       fs.writeFileSync(tempImagePath, Buffer.from(enhancedImage, 'binary'));
 
-      api.sendMessage({
-        body: "✅ 𝐈𝐦𝐚𝐠𝐞 𝐆𝐞𝐧𝐞𝐫𝐚𝐭𝐞𝐝 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥𝐥𝐲!",
+      // Send enhanced image with success message
+      await api.sendMessage({
+        body: "✅ 4K Enhancement সম্পূর্ণ!\n\n🎨 আপনার image সফলভাবে enhance করা হয়েছে!\n🔥 Quality significantly improved!",
         attachment: fs.createReadStream(tempImagePath)
-      }, threadID, () => fs.unlinkSync(tempImagePath), messageID);
+      }, threadID, () => {
+        // Clean up file after sending
+        try {
+          fs.unlinkSync(tempImagePath);
+        } catch (e) {}
+      }, messageID);
 
-      api.unsendMessage(processingMsg.messageID);
+      // Remove loading message
+      try {
+        await api.unsendMessage(processingMsg.messageID);
+      } catch (e) {}
 
     } catch (error) {
-      api.sendMessage(`❌ Error`, threadID, messageID);
+      console.error("4K Enhancement error:", error.message);
+      try {
+        // Try to remove loading message if it exists
+        if (processingMsg && processingMsg.messageID) {
+          await api.unsendMessage(processingMsg.messageID);
+        }
+      } catch (e) {}
+      
+      api.sendMessage(`❌ 4K Enhancement করতে সমস্যা হয়েছে!\n\n🔧 Error: ${error.message}\n💡 আবার try করুন বা অন্য image ব্যবহার করুন।`, threadID, messageID);
     }
   }
 };
