@@ -33,10 +33,52 @@ console.log(chalk.bold.cyan(`
 ╱┃┃┃┃┃╭╮┣┃┣┳━┫╭╮┃┃┃┃┣━━┫╭╮┃┃┃╭╮┃
 ╱╰╯╰━┻╯╰┻━━╯╱╰━━┻━╯╰╯╱╱╰╯╰┻━┻━━╯`));
 
+// Enhanced startup sequence
+console.log(chalk.blue.bold(`
+╔══════════════════════════════════════╗
+║          TOHI-BOT-HUB v1.8.0         ║
+║      Advanced Facebook Bot System    ║
+║     Created by TOHI-BOT-HUB Team     ║
+║         Optimized for Render         ║
+╚══════════════════════════════════════╝
+`));
+
+// Clean up problematic files for Render deployment
+if (process.env.RENDER || process.env.RENDER_SERVICE_ID) {
+  try {
+    const problematicPaths = [
+      './attached_assets',
+      './modules/commands/cache',
+      './modules/events/cache'
+    ];
+
+    for (const dirPath of problematicPaths) {
+      if (fs.existsSync(dirPath)) {
+        // Clear binary files that cause UTF-8 decode errors
+        const files = fs.readdirSync(dirPath);
+        files.forEach(file => {
+          const filePath = path.join(dirPath, file);
+          const stat = fs.statSync(filePath);
+          if (stat.isFile() && /\.(jpe?g|png|gif|mp4|webp|bmp|tiff)$/i.test(file)) {
+            try {
+              fs.unlinkSync(filePath);
+              logger.log(`Cleaned binary file: ${file}`, "RENDER");
+            } catch (e) {
+              // Silent fail for file cleanup
+            }
+          }
+        });
+      }
+    }
+  } catch (error) {
+    logger.log(`Cleanup warning: ${error.message}`, "RENDER");
+  }
+}
+
 // Initialize web server with enhanced error handling and Render support
 try {
   const webServer = new WebServer();
-  
+
   // Configure for Render environment
   const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
   if (isRender) {
@@ -44,7 +86,7 @@ try {
     process.env.PORT = process.env.PORT || '10000';
     logger.log(`Render detected - using PORT: ${process.env.PORT}`, "WEBSERVER");
   }
-  
+
   webServer.start();
   logger.log("Web server initialized successfully", "WEBSERVER");
 } catch (error) {
@@ -129,16 +171,16 @@ function startProject() {
 
     // Detect Render environment
     const isRender = process.env.RENDER || process.env.RENDER_SERVICE_ID || process.env.RENDER_EXTERNAL_URL;
-    
+
     if (isRender) {
       logger.log("Render environment detected - applying optimizations", "RENDER");
-      
+
       // Render-specific optimizations
       process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-      
+
       // Set memory limits for Render
       process.env.NODE_OPTIONS = (process.env.NODE_OPTIONS || '') + ' --max-old-space-size=512';
-      
+
       // Direct execution for Render (no child process)
       logger.log("Running in Render mode - direct execution", "RENDER");
       initializeBot();
