@@ -96,7 +96,7 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
     const heavyCommands = [
       'album', 'album2', 'work', 'daily', 'video', 'video2', 'video3',
       'sing', 'sing2', 'tiktok', 'download', 'ai', 'gemini', 'imagine',
-      'dalle', 'art', 'cover', 'fbcover', 'insta', 'twitter', 'pinterest'
+      'dalle', 'art', 'cover', 'fbcover', 'fbcover', 'insta', 'twitter', 'pinterest'
     ];
 
     const veryHeavyCommands = [

@@ -10,7 +10,7 @@ module.exports = function({ api }) {
     fs.writeFileSync(groupsDataPath, JSON.stringify({
       settings: {
         autoApprove: {
-          enabled: true,
+          enabled: false,
           autoApproveMessage: false
         },
         migrated: false
