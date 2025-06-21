@@ -78,8 +78,14 @@ module.exports = function ({ api }) {
         }
       });
       
+      // Reduce log spam - only log database stats every 100 loads
       if (global.config.autoCreateDB) {
-        logger.log(`Database loaded: ${global.data.allThreadID.length} threads, ${global.data.allUserID.length} users`, "DATABASE");
+        if (!global.dbLoadCount) global.dbLoadCount = 0;
+        global.dbLoadCount++;
+        
+        if (global.dbLoadCount % 100 === 0) {
+          logger.log(`Database loaded: ${global.data.allThreadID.length} threads, ${global.data.allUserID.length} users`, "DATABASE");
+        }
       }
     } catch (error) {
       logger.log(`Database initialization error (ignored): ${error.message}`, "DEBUG");

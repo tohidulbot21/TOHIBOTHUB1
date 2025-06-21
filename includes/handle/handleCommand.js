@@ -191,9 +191,17 @@ module.exports = function ({ api, Users, Threads, Currencies, logger, botSetting
             return; // Silent block for rejected groups
           } else if (!isApproved || isPending) {
             // Group is pending or not approved - block for non-admins
-            logger.log(`⏳ Group ${currentTID} NOT APPROVED (${groupData.status}) - blocking command ${commandName}`, "WARN");
+            // Reduce log spam - only log once per hour per group
+            if (!global.lastLoggedGroups) global.lastLoggedGroups = new Map();
+            const lastLogged = global.lastLoggedGroups.get(currentTID) || 0;
+            const now = Date.now();
 
-            // Send notification
+            if (now - lastLogged > 3600000) { // 1 hour = 3600000ms
+              logger.log(`⏳ Group ${currentTID} NOT APPROVED (${groupData.status}) - blocking commands`, "WARN");
+              global.lastLoggedGroups.set(currentTID, now);
+            }
+
+            // Send notification only once
             if (!global.notifiedGroups) global.notifiedGroups = new Set();
 
             if (!global.notifiedGroups.has(currentTID)) {
