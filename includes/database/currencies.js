@@ -164,11 +164,47 @@ module.exports = function ({ models, Users }) {
         }
 	}
 
+	async function createData(userID) {
+		try {
+			if (!userID) throw new Error("User ID cannot be blank");
+			userID = String(userID);
+			if (isNaN(userID)) throw new Error("Invalid user ID");
+			
+			// Check if user already exists
+			if (Currencies.hasOwnProperty(userID)) {
+				return Currencies[userID]; // Return existing data
+			}
+			
+			// Create new user data
+			const newUserData = {
+				userID: userID,
+				money: 0,
+				exp: 0,
+				createTime: {
+					timestamp: Date.now()
+				},
+				data: {
+					timestamp: Date.now()
+				},
+				lastUpdate: Date.now()
+			};
+			
+			Currencies[userID] = newUserData;
+			await saveData(Currencies);
+			
+			return newUserData;
+		} catch (error) {
+			console.log(`[CURRENCIES] Create data error for ${userID}: ${error.message}`);
+			return false;
+		}
+	}
+
 	return {
 		getData,
 		setData,
 		delData,
 		increaseMoney,
-		decreaseMoney
+		decreaseMoney,
+		createData
 	};
 };
